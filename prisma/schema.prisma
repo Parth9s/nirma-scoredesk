@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core Models
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("STUDENT") // ADMIN, STUDENT
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Branch {
+  id        String     @id @default(uuid())
+  name      String     @unique // e.g., "Computer Science"
+  slug      String     @unique // e.g., "cse"
+  semesters Semester[]
+}
+
+model Semester {
+  id       String    @id @default(uuid())
+  number   Int       // 1, 2, 3...
+  branchId String
+  branch   Branch    @relation(fields: [branchId], references: [id])
+  subjects Subject[]
+  academicCalendarUrl String? // URL to PDF
+  
+  @@unique([branchId, number])
+}
+
+model Subject {
+  id         String   @id @default(uuid())
+  name       String
+  code       String   @unique // e.g., "2CS401"
+  credits    Float
+  semesterId String
+  semester   Semester @relation(fields: [semesterId], references: [id])
+
+  evaluationConfigs EvaluationConfig[]
+  resources        Resource[]
+  importantTopics  ImportantTopic[]
+  schedules        SubjectSchedule[]
+  
+  // Custom Policy Overrides (optional, if null use defaults)
+  attendanceThreshold Float @default(85.0) 
+}
+
+// Evaluation & Grading
+
+model EvaluationConfig {
+  id        String        @id @default(uuid())
+  subjectId String
+  subject   Subject       @relation(fields: [subjectId], references: [id])
+  type      String        // CE, LPW, SEE
+  weight    Float         // e.g., 0.3 for 30%
+  maxMarks  Int           @default(100)
+  rules     String?       // Custom rules for calculation (JSON string)
+  
+  @@unique([subjectId, type])
+}
+
+
+
+model SubjectSchedule {
+  id        String    @id @default(uuid())
+  subjectId String
+  subject   Subject   @relation(fields: [subjectId], references: [id])
+  day       String    // MONDAY, TUESDAY...
+  slotCount Int       @default(1) // How many lectures/labs on this day
+}
+
+// Resources
+
+model Resource {
+  id          String       @id @default(uuid())
+  title       String
+  type        String       // NOTE, PYQ
+  url         String
+  subjectId   String
+  subject     Subject      @relation(fields: [subjectId], references: [id])
+  
+  // PYQ Specifics
+  year        Int?
+  examType    String?      // "Mid Sem", "End Sem"
+  
+  // Metadata
+  author      String?
+  uploadedAt  DateTime     @default(now())
+  downloads   Int          @default(0)
+}
+
+model ImportantTopic {
+  id        String   @id @default(uuid())
+  title     String
+  unit      Int?
+  tags      String? // "Very Important, Repeated" (Comma separated)
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+}
+
+// Community
+
+model Contribution {
+  id          String             @id @default(uuid())
+  type        String             // NOTE, PYQ
+  status      String             @default("PENDING") // PENDING, APPROVED, REJECTED
+  data        String             // Stores title, url, subjectCode etc. (JSON string)
+  submittedBy String?            // Name or email
+  createdAt   DateTime           @default(now())
+}
