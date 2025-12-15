@@ -5,8 +5,49 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Nirma ScoreDesk",
-  description: "Academic companion for Nirma University students",
+  metadataBase: new URL('https://nirma-scordesk.vercel.app'),
+  title: {
+    default: "Nirma ScoreDesk | Academic Dashboard",
+    template: "%s | Nirma ScoreDesk"
+  },
+  description: "The ultimate academic companion for Nirma University students. Calculate SGPA/CGPA, track attendance, and access study resources.",
+  keywords: ["Nirma University", "ScoreDesk", "SGPA Calculator", "CGPA Calculator", "Nirma Attendance", "Engineering Notes", "PYQ"],
+  authors: [{ name: "Parth Savaliya" }],
+  creator: "Parth Savaliya",
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: "https://nirma-scordesk.vercel.app",
+    title: "Nirma ScoreDesk - Student Dashboard",
+    description: "Track your academic progress, calculate grades, and access resources at Nirma University.",
+    siteName: "Nirma ScoreDesk",
+    images: [{
+      url: "/icon.png", // Next.js will resolve this
+      width: 512,
+      height: 512,
+      alt: "Nirma ScoreDesk Logo"
+    }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nirma ScoreDesk",
+    description: "Academic tools for Nirma University students.",
+    images: ["/icon.png"], // Fallback to icon if no banner exists yet
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: "google-site-verification-placeholder", // User can fill this later
+  },
 };
 
 import { GoogleAdSense } from "@/components/GoogleAdSense";
