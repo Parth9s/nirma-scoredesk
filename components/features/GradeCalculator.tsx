@@ -42,9 +42,11 @@ export function GradeCalculator() {
         fetchSubjects();
     }, []);
 
-    // Filter relevant subjects
+    // Filter relevant subjects (and exclude 0 credit subjects)
     const mySubjects = subjects.filter(s =>
-        s.branch === branch && s.semester === semester
+        s.branch === branch &&
+        s.semester === semester &&
+        s.credits > 0 // User Request: Remove 0 credit subjects from SGPA Calc
     );
 
     // Store user inputs: subjectId -> componentIndex -> marks Scored

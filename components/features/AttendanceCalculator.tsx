@@ -1,22 +1,58 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, CheckCircle, Calculator, FlaskConical, BookOpen } from 'lucide-react';
+import { AlertCircle, CheckCircle, Calculator, FlaskConical, BookOpen, Upload, FileText, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from "@/components/ui/switch";
+import { parseMISReport, AttendanceRecord } from '@/lib/mis-parser';
 
 export function AttendanceCalculator() {
+    // Mode: 'generic' (default) or 'imported' (list)
+    const [importedData, setImportedData] = useState<AttendanceRecord[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Generic Calculator State (Legacy)
     const [lecture, setLecture] = useState({ total: 0, attended: 0 });
     const [lab, setLab] = useState({ total: 0, attended: 0 });
     const [hasLab, setHasLab] = useState(true);
     const [targetPercentage, setTargetPercentage] = useState(85);
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const records = await parseMISReport(file);
+            if (records.length === 0) {
+                setError("No attendance data found. Please ensure it's a valid MIS Report (PDF or HTML).");
+            } else {
+                setImportedData(records);
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Failed to parse file. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const clearImport = () => {
+        setImportedData([]);
+        setError(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
     // Helper to generic calculation
     const calculateStats = (attended: number, total: number) => {
         if (total === 0) return { attended, total, percentage: 0 };
-        // Ceiling function as requested
         const percentage = Math.ceil((attended / total) * 100);
         return { attended, total, percentage };
     };
@@ -24,14 +60,10 @@ export function AttendanceCalculator() {
     const lectureStats = calculateStats(lecture.attended, lecture.total);
     const labStats = calculateStats(lab.attended, lab.total);
 
-    // Overall Calculation (Average of percentages)
+    // Overall Calculation (Generic Mode)
+    // defined unconditionally
     const overallPercentage = useMemo(() => {
         if (!hasLab) return lectureStats.percentage;
-        // Average of the two percentages, also ceiled? User said "my avg attandance... is 95%" from 90 and 100.
-        // (90 + 100) / 2 = 95.
-        // If 90.5 (which is 91) and 100.
-        // (91 + 100) / 2 = 95.5 -> ceil -> 96?
-        // Let's ceil the final result too.
         return Math.ceil((lectureStats.percentage + labStats.percentage) / 2);
     }, [lectureStats, labStats, hasLab]);
 
@@ -41,57 +73,159 @@ export function AttendanceCalculator() {
         type: 'Lecture' | 'Lab' | 'Overall'
     ) => {
         if (stats.percentage >= target) {
-            // Can Bunk
             const bunks = Math.floor((stats.attended * 100 - target * stats.total) / target);
-            if (bunks <= 0) return { type: 'neutral', msg: 'Maintain attendance.' };
+            if (bunks <= 0) return { type: 'neutral', msg: 'Maintain.' };
 
-            let msg = `You can bunk ${bunks} ${type}${bunks > 1 ? 's' : ''} safely.`;
+            let msg = `Safe to bunk ${bunks} ${type}${bunks > 1 ? 's' : ''}.`;
 
             // Equivalency Logic: 2 Lectures = 1 Lab
             if (type === 'Lecture' && bunks >= 2) {
                 const labs = Math.floor(bunks / 2);
-                msg = `You can bunk ${bunks} Lectures / ${labs} Lab${labs > 1 ? 's' : ''} safely.`;
+                msg = `Safe to bunk ${bunks} Lectures / ${labs} Lab${labs > 1 ? 's' : ''}.`;
             } else if (type === 'Lab' && bunks >= 1) {
                 const lectures = bunks * 2;
-                msg = `You can bunk ${bunks} Lab${bunks > 1 ? 's' : ''} / ${lectures} Lectures safely.`;
+                msg = `Safe to bunk ${bunks} Lab${bunks > 1 ? 's' : ''} / ${lectures} Lectures.`;
             }
 
             return { type: 'success', msg };
         } else {
-            // Must Attend
             const needed = Math.ceil(((target * stats.total) - (100 * stats.attended)) / (100 - target));
             if (needed <= 0) return { type: 'neutral', msg: 'On track.' };
-            return { type: 'danger', msg: `Attend next ${needed} ${type}${needed > 1 ? 's' : ''} to reach ${target}%.` };
+            return { type: 'danger', msg: `Attend ${needed} ${type}${needed > 1 ? 's' : ''}.` };
         }
     };
 
     const lectureRec = getRecommendation(lectureStats, targetPercentage, 'Lecture');
     const labRec = getRecommendation(labStats, targetPercentage, 'Lab');
 
-    // Overall Recommendation is tricky because we have two variables.
-    // It's ambiguous "how many to attend" for overall average.
-    // Just show the status? Or assume user wants to attend both?
-    // Let's show a generic status for overall.
-    const overallStatus = overallPercentage >= targetPercentage ? 'Safe' : 'Critical';
+    // Render logic for a single card (used in list)
+    const AttendanceCard = ({ record }: { record: AttendanceRecord }) => {
+        const stats = calculateStats(record.attended, record.total);
 
+        // Map Tutorial to Lab for recommendation logic as requested ("1 lab/tutorial = 2 lecture")
+        let recType: 'Lecture' | 'Lab' | 'Overall' = 'Overall';
+        if (record.type === 'Lecture') recType = 'Lecture';
+        else if (record.type === 'Lab' || record.type === 'Tutorial') recType = 'Lab';
+
+        const rec = getRecommendation(stats, targetPercentage, recType);
+
+        return (
+            <div className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2">
+                    <div>
+                        <div className="font-semibold text-gray-800">{record.name}</div>
+                        <div className="text-xs text-gray-400 font-mono">{record.code} • {record.type}</div>
+                    </div>
+                    <div className={`text-xl font-bold ${stats.percentage >= targetPercentage ? 'text-green-600' : 'text-red-600'}`}>
+                        {stats.percentage}%
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <div>
+                        <span className="font-bold text-gray-900">{record.attended}</span>
+                        <span className="text-gray-400"> / {record.total}</span>
+                        <span className="text-xs text-gray-400 ml-1">Attended</span>
+                    </div>
+                </div>
+
+                <div className={`rounded px-2.5 py-1.5 text-xs font-medium flex items-center gap-2 ${rec.type === 'success' ? 'bg-green-50 text-green-700' :
+                    rec.type === 'danger' ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-700'
+                    }`}>
+                    {rec.type === 'success' ? <CheckCircle className="w-3 h-3" /> :
+                        rec.type === 'danger' ? <AlertCircle className="w-3 h-3" /> : null}
+                    {rec.msg}
+                </div>
+            </div>
+        );
+    };
+
+    // If Import Active - RENDER ONLY
+    if (importedData.length > 0) {
+        return (
+            <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+                <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                            <FileText className="w-6 h-6 text-blue-400" />
+                            Attendance Report
+                        </h2>
+                        <p className="text-slate-400 text-sm mt-1">
+                            Found {importedData.length} subjects from your PDF.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-700">
+                            <Label className="text-slate-300 text-xs uppercase tracking-wider">Target %</Label>
+                            <input
+                                type="number"
+                                className="w-12 bg-transparent text-white font-bold text-center border-none focus:ring-0 p-0"
+                                value={targetPercentage}
+                                onChange={e => setTargetPercentage(Math.max(1, Math.min(100, Number(e.target.value))))}
+                            />
+                        </div>
+                        <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800" onClick={clearImport}>
+                            <X className="w-4 h-4 mr-2" /> Clear
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {importedData.map((record, i) => (
+                        <AttendanceCard key={i} record={record} />
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // Default Generic View
     return (
         <Card className="max-w-3xl mx-auto shadow-md border-slate-200">
             <CardHeader className="bg-slate-50/50 pb-4 border-b">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <CardTitle className="flex items-center gap-2">
                         <Calculator className="w-5 h-5 text-blue-600" />
                         Generic Attendance Calculator
                     </CardTitle>
-                    <div className="flex items-center gap-2">
-                        <Label className="text-sm">Target %</Label>
-                        <input
-                            type="number"
-                            className="w-16 rounded border-gray-300 p-1 text-sm md:text-base text-center font-bold"
-                            value={targetPercentage}
-                            onChange={e => setTargetPercentage(Math.max(1, Math.min(100, Number(e.target.value))))}
-                        />
+
+                    <div className="flex items-center gap-3">
+                        {/* Import Button */}
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".pdf,.html,.htm"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                                disabled={isLoading}
+                            />
+                            <Button variant="outline" size="sm" className="gap-2" disabled={isLoading}>
+                                {isLoading ? (
+                                    <span className="animate-spin">⏳</span>
+                                ) : (
+                                    <Upload className="w-4 h-4" />
+                                )}
+                                {isLoading ? 'Scanning PDF...' : 'Import MIS PDF/HTML'}
+                            </Button>
+                        </div>
+
+                        <div className="flex items-center gap-2 border-l pl-3 ml-1">
+                            <Label className="text-sm">Target %</Label>
+                            <input
+                                type="number"
+                                className="w-16 rounded border-gray-300 p-1 text-sm md:text-base text-center font-bold"
+                                value={targetPercentage}
+                                onChange={e => setTargetPercentage(Math.max(1, Math.min(100, Number(e.target.value))))}
+                            />
+                        </div>
                     </div>
                 </div>
+                {error && (
+                    <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded flex items-center gap-2 animate-in slide-in-from-top-1">
+                        <AlertCircle className="w-4 h-4" /> {error}
+                    </div>
+                )}
             </CardHeader>
             <CardContent className="pt-6 space-y-8">
 

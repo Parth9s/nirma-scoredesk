@@ -25,7 +25,10 @@ export async function POST(request: Request) {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
                     folder: 'nirma_scoredesk_uploads',
-                    resource_type: 'auto', // Auto-detect PDF, Image, etc.
+                    resource_type: 'auto',
+                    use_filename: true, // Use the uploaded filename
+                    unique_filename: true, // Append random string to avoid overlap
+                    filename_override: file.name, // Explicitly pass the original name
                 },
                 (error, result) => {
                     if (error) reject(error);
