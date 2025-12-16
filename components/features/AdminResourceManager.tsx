@@ -64,6 +64,7 @@ export function AdminResourceManager() {
         title: string;
         type: ResourceType;
         url: string;
+        driveId?: string; // New field
         subjectId: string;
         semester: number;
         branch: string;
@@ -73,6 +74,7 @@ export function AdminResourceManager() {
         title: '',
         type: 'NOTE',
         url: '',
+        driveId: '',
         subjectId: '',
         semester: 4,
         branch: 'Computer Science & Engineering'
@@ -128,7 +130,8 @@ export function AdminResourceManager() {
             const data = await res.json();
 
             if (res.ok && data.url) {
-                setNewRes(prev => ({ ...prev, url: data.url }));
+                // Save both URL and Drive ID
+                setNewRes(prev => ({ ...prev, url: data.url, driveId: data.driveId }));
                 toast({ title: 'Uploaded', description: 'File uploaded successfully' });
             } else {
                 throw new Error(data.error || 'Upload failed');
@@ -159,6 +162,7 @@ export function AdminResourceManager() {
                     title: finalTitle,
                     type: newRes.type,
                     url: newRes.url,
+                    driveId: newRes.driveId, // Pass Drive ID for backend organization
                     subjectId: newRes.subjectId,
                     year: newRes.year,
                     examType: newRes.examType,
@@ -169,7 +173,7 @@ export function AdminResourceManager() {
             if (res.ok) {
                 toast({ title: 'Success', description: 'Resource added successfully' });
                 setIsAdding(false);
-                setNewRes({ ...newRes, title: '', url: '', subjectId: '' });
+                setNewRes({ ...newRes, title: '', url: '', driveId: '', subjectId: '' });
                 fetchData(); // Refresh list
             } else {
                 throw new Error('Failed to add');

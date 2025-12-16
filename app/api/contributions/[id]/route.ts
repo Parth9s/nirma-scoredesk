@@ -1,13 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { v2 as cloudinary } from 'cloudinary';
-
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { ensureHierarchy, moveFile, setPublicPermission, getPendingFolderId } from '@/lib/google-drive';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -21,53 +14,73 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             if (!contribution) throw new Error('Contribution not found');
 
             const contributionData = JSON.parse(contribution.data);
+            // Expecting contributionData to have { driveId, url, subjectId, title... }
 
-            // 2. Create actual Resource
+            // 2. Fetch Subject details (for Folder Hierarchy)
+            const subject = await prisma.subject.findUnique({
+                where: { id: contributionData.subjectId },
+                include: { semester: { include: { branch: true } } }
+            });
+
+            if (!subject) throw new Error('Subject not found');
+
+            const driveId = contributionData.driveId;
+
+            // 3. Move File in Google Drive (If driveId exists)
+            // If it was an external link text contribution, driveId might be missing.
+            if (driveId) {
+                try {
+                    // a) Get Headers
+                    const branchName = subject.semester.branch.name;
+                    const semNumber = subject.semester.number;
+
+                    // b) Ensure Target Folder
+                    const targetFolderId = await ensureHierarchy(branchName, semNumber);
+                    const pendingFolderId = await getPendingFolderId();
+
+                    // c) Move File
+                    await moveFile(driveId, pendingFolderId, targetFolderId);
+
+                    // d) Make Public
+                    await setPublicPermission(driveId);
+
+                    // Update URL just in case? Usually webViewLink stays same.
+                } catch (driveError) {
+                    console.error("Drive Move/Share Failed:", driveError);
+                    // Continue anyway? Or fail? 
+                    // Let's log warning but proceed to create resource, 
+                    // or maybe update the user that permissions might be wrong.
+                    // Ideally we want to fail so Admin knows.
+                    throw new Error("Failed to organize file in Drive: " + (driveError as any).message);
+                }
+            }
+
+            // 4. Create actual Resource
             await prisma.resource.create({
                 data: {
                     title: contributionData.title,
                     type: contribution.type,
-                    url: contributionData.url,
+                    url: contributionData.url, // Keep the webViewLink
                     subjectId: contributionData.subjectId,
                     author: contribution.submittedBy
                 }
             });
 
-            // 3. Update status (Keep approved records for history)
+            // 5. Update status
             await prisma.contribution.update({
                 where: { id },
                 data: { status: 'APPROVED' }
             });
         } else {
             // REJECT ACTION -> DELETE and CLEANUP
-
-            // 1. Fetch details to get the file URL
             const contribution = await prisma.contribution.findUnique({ where: { id } });
 
             if (contribution) {
-                const data = JSON.parse(contribution.data);
+                // const data = JSON.parse(contribution.data);
+                // Note: We are currently NOT deleting the file from Drive on Reject. 
+                // It stays in Pending. Admin can manually clean up Pending folder occasionally.
+                // Automating delete requires 'delete' scope or 'trash' API which we can add later if requested.
 
-                // 2. Delete from Cloudinary
-                if (data.url && data.url.includes('cloudinary')) {
-                    try {
-                        const urlParts = data.url.split('/');
-                        const uploadIndex = urlParts.indexOf('upload');
-                        if (uploadIndex !== -1) {
-                            let publicIdParts = urlParts.slice(uploadIndex + 1);
-                            if (publicIdParts.length > 0 && publicIdParts[0].startsWith('v')) {
-                                publicIdParts = publicIdParts.slice(1);
-                            }
-                            const publicIdWithExt = publicIdParts.join('/');
-                            const publicId = publicIdWithExt.split('.').slice(0, -1).join('.');
-
-                            await cloudinary.uploader.destroy(publicId);
-                        }
-                    } catch (err) {
-                        console.error('Failed to cleanup rejected file from Cloudinary', err);
-                    }
-                }
-
-                // 3. Delete Record completely
                 await prisma.contribution.delete({
                     where: { id }
                 });
@@ -75,8 +88,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         }
 
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Contribution logic error:', error);
-        return NextResponse.json({ error: 'Failed to process contribution' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Failed to process contribution' }, { status: 500 });
     }
 }

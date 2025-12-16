@@ -1,19 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { v2 as cloudinary } from 'cloudinary';
-
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
 
-        // 1. Find Resource to get URL
+        // 1. Find Resource 
         const resource = await prisma.resource.findUnique({
             where: { id }
         });
@@ -22,35 +14,21 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
         }
 
-        // 2. Delete file from Cloudinary (if it's a Cloudinary URL)
-        if (resource.url.includes('cloudinary')) {
+        // 2. Delete from Google Drive (Attempt)
+        if (resource.url && resource.url.includes('drive.google.com')) {
             try {
-                // Extract Public ID
-                // URL example: https://res.cloudinary.com/cloudname/image/upload/v1234/nirma_scoredesk_uploads/filename.pdf
-                // We need: nirma_scoredesk_uploads/filename
-                const urlParts = resource.url.split('/');
-                const versionIndex = urlParts.findIndex(part => part.startsWith('v') && !isNaN(Number(part.substring(1))));
-
-                // If version found, everything after is path. If not, maybe after 'upload'?
-                // Simple strategy: Grab everything after "upload/" and remove version if present
-
-                const uploadIndex = urlParts.indexOf('upload');
-                if (uploadIndex !== -1) {
-                    let publicIdParts = urlParts.slice(uploadIndex + 1);
-                    // Remove version (v12345) if present
-                    if (publicIdParts.length > 0 && publicIdParts[0].startsWith('v')) {
-                        publicIdParts = publicIdParts.slice(1);
-                    }
-
-                    const publicIdWithExt = publicIdParts.join('/');
-                    // Remove extension
-                    const publicId = publicIdWithExt.split('.').slice(0, -1).join('.');
-
-                    console.log('Deleting Cloudinary File:', publicId);
-                    await cloudinary.uploader.destroy(publicId);
+                // Extract File ID from URL
+                // Common Formats:
+                // https://drive.google.com/file/d/FILE_ID/view...
+                // https://docs.google.com/file/d/FILE_ID/edit...
+                const matches = resource.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (matches && matches[1]) {
+                    const fileId = matches[1];
+                    const { deleteFile } = await import('@/lib/google-drive');
+                    await deleteFile(fileId);
                 }
-            } catch (cloudError) {
-                console.error('Cloudinary Deletion Error (Continuing DB delete):', cloudError);
+            } catch (driveErr) {
+                console.error('Failed to cleanup Drive file:', driveErr);
             }
         }
 

@@ -1,12 +1,6 @@
 import { NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
-
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { uploadFileToDrive, getPendingFolderId } from '@/lib/google-drive';
+import { Readable } from 'stream';
 
 export async function POST(request: Request) {
     try {
@@ -17,32 +11,40 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
 
+        // Convert File to Node Stream
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const stream = new Readable();
+        stream.push(buffer);
+        stream.push(null);
 
-        // Upload to Cloudinary using a Promise wrapper around the stream
-        const result = await new Promise<any>((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    folder: 'nirma_scoredesk_uploads',
-                    resource_type: 'auto',
-                    use_filename: true, // Use the uploaded filename
-                    unique_filename: true, // Append random string to avoid overlap
-                    filename_override: file.name, // Explicitly pass the original name
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            );
+        // Upload to Drive (Pending Folder)
+        // Note: The library function will handle finding the Pending folder if not explicitly passed,
+        // but it's cleaner to get it here or inside. Our lib currently defaults to Pending if folderId is missing?
+        // Let's rely on the library logic we wrote or call getPendingFolderId.
+        // We updated the lib to take optional folderId. We'll pass nothing to use default logic or get explicit pending ID.
 
-            // Write buffer to stream
-            uploadStream.end(buffer);
+        // Wait, current implementation of uploadFileToDrive requires targetFolderId or it fails if ROOT not set.
+        // But we set logic: "const targetFolderId = folderId || await getFolderId('Pending', ROOT_FOLDER_ID!);"
+        // So passing undefined is fine.
+
+        const driveFile = await uploadFileToDrive(
+            stream,
+            file.name,
+            file.type || 'application/octet-stream'
+        );
+
+        return NextResponse.json({
+            url: driveFile.webViewLink,
+            driveId: driveFile.id
         });
 
-        return NextResponse.json({ url: result.secure_url });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Upload error:', error);
-        return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Upload failed',
+            details: error.message,
+            stack: error.stack
+        }, { status: 500 });
     }
 }

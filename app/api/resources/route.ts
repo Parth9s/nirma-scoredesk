@@ -28,19 +28,50 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { title, type, url, subjectId, author } = body;
+        // Extended body to include driveId if available (passed from frontend upload)
+        const { title, type, url, subjectId, author, driveId } = body;
+
+        // If a Drive File ID is present, we must organize it!
+        if (driveId) {
+            try {
+                // 1. Fetch Subject for hierarchy
+                const subject = await prisma.subject.findUnique({
+                    where: { id: subjectId },
+                    include: { semester: { include: { branch: true } } }
+                });
+
+                if (subject) {
+                    const { ensureHierarchy, moveFile, setPublicPermission, getPendingFolderId } = await import('@/lib/google-drive');
+
+                    const branchName = subject.semester.branch.name;
+                    const semNumber = subject.semester.number;
+
+                    const targetFolderId = await ensureHierarchy(branchName, semNumber);
+                    const pendingFolderId = await getPendingFolderId();
+
+                    // Move and Share
+                    await moveFile(driveId, pendingFolderId, targetFolderId);
+                    await setPublicPermission(driveId);
+                    console.log(`[Drive] File ${driveId} organized for ${branchName} Sem ${semNumber}`);
+                }
+            } catch (driveError) {
+                console.error("Failed to organize Drive file during Resource Create:", driveError);
+                // We don't block resource creation, but warn.
+            }
+        }
 
         const resource = await prisma.resource.create({
             data: {
                 title,
                 type,
-                url,
+                url, // Web View Link
                 subjectId,
                 author: author || 'Admin'
             }
         });
         return NextResponse.json(resource);
     } catch (error) {
+        console.error("Create Resource Error:", error);
         return NextResponse.json({ error: 'Failed to create resource' }, { status: 500 });
     }
 }
