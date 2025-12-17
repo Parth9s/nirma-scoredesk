@@ -10,16 +10,27 @@ interface FeatureLinkCardProps {
     description: string;
     icon: LucideIcon;
     href: string;
-    colorClass: string;
+    borderColorClass: string;
+    iconBgClass: string;
+    iconColorClass: string;
     buttonText?: string;
 }
 
-export function FeatureLinkCard({ title, description, icon: Icon, href, colorClass, buttonText = "Open" }: FeatureLinkCardProps) {
+export function FeatureLinkCard({
+    title,
+    description,
+    icon: Icon,
+    href,
+    borderColorClass,
+    iconBgClass,
+    iconColorClass,
+    buttonText = "Open"
+}: FeatureLinkCardProps) {
     return (
-        <Card className={`group hover:shadow-lg transition-all duration-300 border-l-4 ${colorClass}`}>
+        <Card className={`group hover:shadow-lg transition-all duration-300 border-l-4 ${borderColorClass}`}>
             <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                    <div className={`p-3 rounded-lg bg-opacity-10 ${colorClass.replace("border-l-", "bg-").replace("-500", "-100")} ${colorClass.replace("border-l-", "text-")}`}>
+                    <div className={`p-3 rounded-lg bg-opacity-10 ${iconBgClass} ${iconColorClass}`}>
                         <Icon className="h-6 w-6" />
                     </div>
                     <Link href={href}>

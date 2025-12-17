@@ -52,18 +52,7 @@ export default function DashboardLayout({
 
             {/* Main Content */}
             <div className="flex-1 w-full p-0 md:p-0 overflow-x-hidden">
-                {/* 
-                   Note: The Sidebar component itself has 'fixed' positioning in its CSS. 
-                   I need to modify Sidebar.tsx to NOT be fixed if I'm wrapping it here, 
-                   OR I fix Sidebar.tsx to handle responsive classes itself.
-                   
-                   Looking at Sidebar.tsx: <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white">
-                   THIS IS THE PROBLEM. It forces fixed positioning.
-                   
-                   STRATEGY CHANGE:
-                   1. Modify Sidebar.tsx to accept `className` and remove hardcoded `fixed`.
-                   2. Then use the layout structure above.
-                */}
+
                 {children}
             </div>
         </div>

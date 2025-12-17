@@ -37,19 +37,17 @@ export function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-50">
             <header className="bg-white border-b sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center">
-                        {/* Title removed */}
-                    </div>
+                <div className="h-16 px-6 flex items-center justify-between">
+                    <div className="flex-1" /> {/* Spacer to push content to right */}
                     <div className="flex items-center gap-4">
                         <div className="text-sm text-gray-600 hidden sm:block">
                             {mounted ? `${branch || 'Select Branch'} • Sem ${semester || '-'}` : 'Loading...'}
                         </div>
-                        <Link href="/setup">
-                            <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href="/setup">
                                 Switch
-                            </Button>
-                        </Link>
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             </header>
@@ -72,7 +70,9 @@ export function Dashboard() {
                             description="Plan your target SGPA. Calculate score based on internal components."
                             icon={GraduationCap}
                             href="/dashboard/sgpa"
-                            colorClass="border-l-blue-500"
+                            borderColorClass="border-l-blue-500"
+                            iconBgClass="bg-blue-100"
+                            iconColorClass="text-blue-600"
                             buttonText="Calculate"
                         />
                         <FeatureLinkCard
@@ -80,7 +80,9 @@ export function Dashboard() {
                             description="Check your safe bunks. Maintain 85% attendance requirement."
                             icon={Calendar}
                             href="/dashboard/attendance"
-                            colorClass="border-l-green-500"
+                            borderColorClass="border-l-green-500"
+                            iconBgClass="bg-green-100"
+                            iconColorClass="text-green-600"
                             buttonText="Track"
                         />
                         <FeatureLinkCard
@@ -88,7 +90,9 @@ export function Dashboard() {
                             description="Access lecture notes and study material."
                             icon={BookOpen}
                             href="/dashboard/resources/notes"
-                            colorClass="border-l-purple-500"
+                            borderColorClass="border-l-purple-500"
+                            iconBgClass="bg-purple-100"
+                            iconColorClass="text-purple-600"
                             buttonText="View Notes"
                         />
                     </div>
@@ -147,7 +151,7 @@ export function Dashboard() {
                                             href={calendarUrl}
                                             download
                                             target="_blank"
-                                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3 text-xs w-full bg-indigo-600 text-white hover:bg-indigo-700 bg-primary text-primary-foreground shadow hover:bg-primary/90"
+                                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 px-3 text-xs w-full bg-indigo-600 text-white hover:bg-indigo-700"
                                         >
                                             Download PDF
                                         </a>
