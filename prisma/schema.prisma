@@ -120,3 +120,11 @@ model Contribution {
   submittedBy String?            // Name or email
   createdAt   DateTime           @default(now())
 }
+
+model Holiday {
+  id        String   @id @default(uuid())
+  name      String
+  date      DateTime
+  isFloating Boolean @default(false)
+  createdAt DateTime @default(now())
+}

@@ -11,7 +11,8 @@ import {
     BookOpen,
     FileText,
     Upload,
-    Sparkles
+    Sparkles,
+    Calendar
 } from 'lucide-react';
 import { usePreferencesStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import { Button } from '@/components/ui/button';
 const NAV_ITEMS = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/attendance', label: 'Attendance', icon: Calculator },
+    { href: '/dashboard/calendar', label: 'Calendar', icon: Calendar },
     { href: '/dashboard/sgpa', label: 'SGPA/CGPA', icon: GraduationCap },
     { href: '/dashboard/resources/notes', label: 'Notes', icon: FileText },
     { href: '/dashboard/resources/pyq', label: 'PYQ', icon: BookOpen },
