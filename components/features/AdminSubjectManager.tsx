@@ -140,7 +140,7 @@ export function AdminSubjectManager() {
     const addComponent = () => {
         setEditForm({
             ...editForm,
-            components: [...(editForm.components || []), { type: 'CE', weight: 0, maxMarks: 50 }]
+            components: [...(editForm.components || []), { type: 'CE', weight: 40, maxMarks: 100 }]
         });
     };
 
