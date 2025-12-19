@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 const BRANCHES = [
     'Computer Science & Engineering',
-    'Information Technology',
+    'Electronics and Instrumentation Engineering',
     'Electronics & Communication',
     'Civil Engineering',
     'Mechanical Engineering',

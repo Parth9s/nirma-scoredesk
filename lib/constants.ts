@@ -1,6 +1,6 @@
 export const BRANCHES = [
     'Computer Science & Engineering',
-    'Information Technology',
+    'Electronics and Instrumentation Engineering',
     'Electronics & Communication',
     'Chemical Engineering',
     'Mechanical Engineering',
