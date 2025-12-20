@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, CheckCircle, Calculator, FlaskConical, BookOpen, Upload, FileText, Check, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, Calculator, FlaskConical, BookOpen, Upload, FileText, Check, X, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -315,37 +315,58 @@ export function AttendanceCalculator() {
                 <TabsContent value="import" className="space-y-6">
                     {/* Upload Card */}
                     {importedData.length === 0 && (
-                        <Card className="border-dashed border-2">
-                            <CardContent className="pt-6 flex flex-col items-center justify-center py-12 text-center space-y-4">
-                                <div className="bg-blue-50 p-4 rounded-full">
-                                    <Upload className="w-8 h-8 text-blue-500" />
-                                </div>
-                                <div className="space-y-2">
-                                    <h3 className="font-semibold text-lg">Upload MIS Report</h3>
-                                    <p className="text-sm text-gray-500 max-w-sm mx-auto">
-                                        Drag and drop your MIS Attendance PDF or HTML file here to instantly calculate stats for all subjects.
-                                    </p>
-                                </div>
-                                <div className="relative">
-                                    <input
-                                        type="file"
-                                        accept=".pdf,.html,.htm"
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                        ref={fileInputRef}
-                                        onChange={handleFileUpload}
-                                        disabled={isLoading}
-                                    />
-                                    <Button disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
-                                        {isLoading ? 'Processing...' : 'Select File'}
-                                    </Button>
-                                </div>
-                                {error && (
-                                    <div className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg flex items-center gap-2">
-                                        <AlertCircle className="w-4 h-4" /> {error}
+                        <>
+                            <Card className="border-dashed border-2">
+                                <CardContent className="pt-6 flex flex-col items-center justify-center py-12 text-center space-y-4">
+                                    <div className="bg-blue-50 p-4 rounded-full">
+                                        <Upload className="w-8 h-8 text-blue-500" />
                                     </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                    <div className="space-y-2">
+                                        <h3 className="font-semibold text-lg">Upload MIS Report</h3>
+                                        <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                                            Drag and drop your MIS Attendance PDF or HTML file here to instantly calculate stats for all subjects.
+                                        </p>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.html,.htm"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            ref={fileInputRef}
+                                            onChange={handleFileUpload}
+                                            disabled={isLoading}
+                                        />
+                                        <Button disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+                                            {isLoading ? 'Processing...' : 'Select File'}
+                                        </Button>
+                                    </div>
+                                    {error && (
+                                        <div className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg flex items-center gap-2">
+                                            <AlertCircle className="w-4 h-4" /> {error}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Instructions Guide */}
+                            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-6">
+                                <h4 className="flex items-center gap-2 font-semibold text-blue-900 mb-4">
+                                    <Info className="w-5 h-5 text-blue-600" />
+                                    How to get your Attendance Report?
+                                </h4>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700 marker:text-blue-500 marker:font-bold">
+                                        <li>Login to your <strong>MIS</strong>.</li>
+                                        <li>Generate your <span className="font-medium text-slate-900">Attendance Report</span>.</li>
+                                        
+                                    </ol>
+                                    <div className="space-y-2 text-sm text-slate-600">
+                                        <p><strong>To save as PDF:</strong> Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono text-xs">Ctrl + P</kbd> and choose "Save as PDF".</p>
+                                        <p><strong>To save as HTML:</strong> Right-click &gt; "Save As..." &gt; "Webpage, Complete".</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     {/* Results View */}

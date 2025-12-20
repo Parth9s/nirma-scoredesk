@@ -114,7 +114,7 @@ export default function CalendarPage() {
             <div className="flex flex-col md:flex-row justify-between md:items-end gap-6">
                 <div>
                     <div>
-                        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                             Calendar & Vacations
                         </h1>
                         <p className="text-muted-foreground mt-2 text-lg">
@@ -123,27 +123,27 @@ export default function CalendarPage() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 bg-white/50 backdrop-blur-sm p-1.5 rounded-2xl border shadow-sm">
-                    <Button variant="ghost" size="icon" onClick={previousMonth} className="rounded-xl hover:bg-white hover:shadow-md transition-all">
+                <div className="flex items-center gap-4 bg-card/50 backdrop-blur-sm p-1.5 rounded-2xl border shadow-sm">
+                    <Button variant="ghost" size="icon" onClick={previousMonth} className="rounded-xl hover:bg-card hover:shadow-md transition-all">
                         <ChevronLeft className="h-5 w-5" />
                     </Button>
-                    <div className="flex items-center px-6 font-bold text-lg w-48 justify-center text-slate-700">
+                    <div className="flex items-center px-6 font-bold text-lg w-48 justify-center text-card-foreground">
                         {format(currentDate, 'MMMM yyyy')}
                     </div>
-                    <Button variant="ghost" size="icon" onClick={nextMonth} className="rounded-xl hover:bg-white hover:shadow-md transition-all">
+                    <Button variant="ghost" size="icon" onClick={nextMonth} className="rounded-xl hover:bg-card hover:shadow-md transition-all">
                         <ChevronRight className="h-5 w-5" />
                     </Button>
                 </div>
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-500 h-10 w-10" /></div>
+                <div className="flex justify-center p-20"><Loader2 className="animate-spin text-primary h-10 w-10" /></div>
             ) : (
                 <div className="grid lg:grid-cols-4 gap-8">
                     {/* Calendar Grid */}
-                    <Card className="lg:col-span-3 border-none shadow-xl bg-white/80 backdrop-blur-xl ring-1 ring-slate-200/50 rounded-3xl overflow-hidden">
+                    <Card className="lg:col-span-3 border-none shadow-none bg-card/80 backdrop-blur-xl ring-1 ring-border/50 rounded-3xl overflow-hidden">
                         <CardContent className="p-6 md:p-8">
-                            <div className="grid grid-cols-7 mb-6 text-center text-sm font-bold text-slate-400 uppercase tracking-widest">
+                            <div className="grid grid-cols-7 mb-6 text-center text-sm font-bold text-muted-foreground uppercase tracking-widest">
                                 <div>Sun</div>
                                 <div>Mon</div>
                                 <div>Tue</div>
@@ -156,7 +156,7 @@ export default function CalendarPage() {
                             <div className="grid grid-cols-7 gap-2 md:gap-3">
                                 {/* Pad start of month */}
                                 {Array.from({ length: getDay(startOfMonth(currentDate)) }).map((_, i) => (
-                                    <div key={`pad-${i}`} className="h-24 md:h-32 bg-slate-50/30 rounded-2xl" />
+                                    <div key={`pad-${i}`} className="h-24 md:h-32 bg-muted/30 rounded-2xl" />
                                 ))}
 
                                 {days.map((day, i) => {
@@ -169,19 +169,19 @@ export default function CalendarPage() {
                                         <div
                                             key={i}
                                             className={cn(
-                                                "h-24 md:h-32 border-2 rounded-2xl p-3 flex flex-col justify-between transition-all relative group shadow-sm hover:shadow-md bg-white hover:scale-[1.02] hover:-translate-y-0.5",
-                                                isToday && "border-blue-500 shadow-blue-200 shadow-lg",
+                                                "h-24 md:h-32 border-2 rounded-2xl p-3 flex flex-col justify-between transition-all relative group shadow-sm hover:shadow-md bg-card hover:scale-[1.02] hover:-translate-y-0.5",
+                                                isToday && "border-primary shadow-primary/20 shadow-lg",
                                                 suggestion && "border-emerald-400 bg-emerald-50/50",
                                                 holiday && "border-rose-200 bg-rose-50/50",
                                                 isVacationWeekend && "border-emerald-200 bg-emerald-50/30", // Vacation weekend style
                                                 !holiday && !suggestion && !isVacationWeekend && isWeekendDay && "border-amber-100/50 bg-amber-50/60",
-                                                !holiday && !suggestion && !isWeekendDay && "border-slate-100"
+                                                !holiday && !suggestion && !isWeekendDay && "border-border"
                                             )}
                                         >
                                             <div className="flex justify-between items-start">
                                                 <span className={cn(
                                                     "text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full transition-colors",
-                                                    isToday ? "bg-blue-600 text-white shadow-md shadow-blue-300" : "text-slate-600 group-hover:bg-slate-100"
+                                                    isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/30" : "text-muted-foreground group-hover:bg-muted"
                                                 )}>
                                                     {format(day, 'd')}
                                                 </span>
@@ -222,25 +222,25 @@ export default function CalendarPage() {
                     {/* Sidebar Suggestions */}
                     <div className="space-y-6">
                         <div>
-                            <Card className="border-none shadow-lg bg-white/80 backdrop-blur-xl rounded-3xl ring-1 ring-slate-200/50">
+                            <Card className="border-none shadow-lg bg-card/80 backdrop-blur-xl rounded-3xl ring-1 ring-border/50">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg font-bold">Upcoming Holidays</CardTitle>
+                                    <CardTitle className="text-lg font-bold text-card-foreground">Upcoming Holidays</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     {holidays.filter(h => new Date(h.date) >= new Date()).slice(0, 5).map(h => (
-                                        <div key={h.id} className="flex gap-4 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 p-2 rounded-xl transition-colors">
-                                            <div className="text-center w-12 bg-blue-50 rounded-xl flex flex-col items-center justify-center py-1 border border-blue-100">
-                                                <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">{format(new Date(h.date), 'MMM')}</div>
-                                                <div className="text-lg font-extrabold text-blue-600 leading-none">{format(new Date(h.date), 'd')}</div>
+                                        <div key={h.id} className="flex gap-4 py-3 border-b border-border last:border-0 hover:bg-muted p-2 rounded-xl transition-colors">
+                                            <div className="text-center w-12 bg-primary/10 rounded-xl flex flex-col items-center justify-center py-1 border border-primary/20">
+                                                <div className="text-[10px] font-bold text-primary uppercase tracking-wider">{format(new Date(h.date), 'MMM')}</div>
+                                                <div className="text-lg font-extrabold text-primary leading-none">{format(new Date(h.date), 'd')}</div>
                                             </div>
                                             <div className="flex-1 flex flex-col justify-center">
-                                                <div className="font-bold text-slate-800">{h.name}</div>
-                                                <div className="text-xs font-medium text-slate-500">{format(new Date(h.date), 'EEEE')}</div>
+                                                <div className="font-bold text-card-foreground">{h.name}</div>
+                                                <div className="text-xs font-medium text-muted-foreground">{format(new Date(h.date), 'EEEE')}</div>
                                             </div>
                                         </div>
                                     ))}
                                     {holidays.filter(h => new Date(h.date) >= new Date()).length === 0 && (
-                                        <div className="text-sm text-slate-400 py-4 text-center italic">No upcoming holidays found.</div>
+                                        <div className="text-sm text-muted-foreground py-4 text-center italic">No upcoming holidays found.</div>
                                     )}
                                 </CardContent>
                             </Card>

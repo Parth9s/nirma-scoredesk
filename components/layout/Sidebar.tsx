@@ -38,22 +38,22 @@ export function Sidebar({ className, onLinkClick }: { className?: string, onLink
     }, []);
 
     return (
-        <aside className={cn("h-screen w-64 border-r bg-white flex flex-col", className)}>
-            <div className="flex h-16 items-center px-6 border-b shrink-0 bg-white">
-                <h1 className="text-xl font-bold text-blue-600">Nirma ScoreDesk</h1>
+        <aside className={cn("h-screen w-64 border-r bg-sidebar flex flex-col", className)}>
+            <div className="flex h-16 items-center px-6 border-b shrink-0 bg-sidebar">
+                <h1 className="text-xl font-bold text-sidebar-primary">Nirma ScoreDesk</h1>
             </div>
 
-            <div className="p-4 border-b bg-gray-50 shrink-0">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Current</div>
+            <div className="p-4 border-b bg-muted shrink-0">
+                <div className="text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">Current</div>
                 {mounted ? (
                     <>
-                        <div className="mt-1 font-semibold truncate">{branch || 'Select Branch'}</div>
-                        <div className="text-sm text-gray-600">Semester {semester || '-'}</div>
+                        <div className="mt-1 font-semibold truncate text-sidebar-foreground">{branch || 'Select Branch'}</div>
+                        <div className="text-sm text-sidebar-foreground/80">Semester {semester || '-'}</div>
                     </>
                 ) : (
                     <>
-                        <div className="mt-1 font-semibold truncate">Loading...</div>
-                        <div className="text-sm text-gray-600">Semester -</div>
+                        <div className="mt-1 font-semibold truncate text-sidebar-foreground">Loading...</div>
+                        <div className="text-sm text-sidebar-foreground/80">Semester -</div>
                     </>
                 )}
             </div>
@@ -67,15 +67,15 @@ export function Sidebar({ className, onLinkClick }: { className?: string, onLink
                         className={cn(
                             "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                             pathname === item.href
-                                ? "bg-blue-50 text-blue-700"
-                                : "text-gray-700 hover:bg-gray-100",
+                                ? "bg-sidebar-accent text-sidebar-primary"
+                                : "text-sidebar-foreground hover:bg-sidebar-accent/50",
                             // @ts-ignore
                             item.disabled && "opacity-50 cursor-not-allowed pointer-events-none"
                         )}
                         // @ts-ignore
                         aria-disabled={item.disabled}
                     >
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className={cn("h-4 w-4", pathname === item.href ? "text-sidebar-primary" : "text-sidebar-foreground")} />
                         {item.label}
                     </Link>
                 ))}

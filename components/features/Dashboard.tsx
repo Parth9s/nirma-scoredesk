@@ -167,14 +167,7 @@ export function Dashboard() {
                             </CardContent>
                         </Card>
 
-                        {/* Quick Tips */}
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                            <h4 className="font-bold text-yellow-800 text-sm mb-2">💡 Pro Tip</h4>
-                            <p className="text-xs text-yellow-700 leading-relaxed">
-                                Use the <strong>Attendance Tracker</strong> to mark your "Safe Bunks".
-                                The system alerts you if you drop below 85%.
-                            </p>
-                        </div>
+
                     </div>
                 </div>
             </main>
