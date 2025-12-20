@@ -99,7 +99,7 @@ export function AdminSubjectManager() {
     };
 
     const handleDelete = async (id: string) => {
-        // if (!confirm('Are you sure? This will delete all resources and data for this subject.')) return;
+        if (!confirm('Are you sure? This will delete all resources and data for this subject.')) return;
 
         try {
             const res = await fetch(`/api/subjects/${id}`, { method: 'DELETE' });

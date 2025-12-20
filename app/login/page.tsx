@@ -15,9 +15,10 @@ export default function LoginPage() {
                     <p className="text-sm text-gray-500">Student & Faculty Portal</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="text-center text-sm text-gray-600 mb-4">
-                        Authorized access only. Use your university email ID.
-                    </div>
+                    <p className="text-center text-sm text-gray-600 mb-4">
+                        Authorised access only.
+                        Use your university email ID.
+                    </p>
 
                     <Button
                         className="w-full bg-white text-gray-700 border hover:bg-gray-50 flex gap-2 items-center justify-center"
@@ -29,12 +30,10 @@ export default function LoginPage() {
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                             <path d="M12 4.63c1.61 0 3.06.56 4.23 1.68l3.18-3.18C17.46 1.28 14.97 0 12 0 7.7 0 3.99 2.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                         </svg>
-                        Sign in with Nirma SSO
+                        Sign in
                     </Button>
 
-                    <p className="text-xs text-center text-gray-400 mt-4">
-                        [DEV MODE] Access allowed for all Google Accounts
-                    </p>
+        
                 </CardContent>
             </Card>
         </div>

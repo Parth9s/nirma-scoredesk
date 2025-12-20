@@ -197,6 +197,8 @@ export function AdminResourceManager() {
     };
 
     const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this resource?')) return;
+
         try {
             const res = await fetch(`/api/resources/${id}`, { method: 'DELETE' });
             if (res.ok) {
