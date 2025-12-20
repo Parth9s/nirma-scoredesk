@@ -36,6 +36,7 @@ export function ContributeForm() {
         type: 'NOTE',
         subjectId: '',
         title: '',
+        description: '',
         link: '',
         author: ''
     });
@@ -109,6 +110,7 @@ export function ContributeForm() {
                     type: formData.type,
                     subjectId: formData.subjectId,
                     title: formData.title,
+                    description: formData.description,
                     url: formData.link,
                     author: formData.author || 'Anonymous Student'
                 })
@@ -116,7 +118,7 @@ export function ContributeForm() {
 
             if (res.ok) {
                 setSubmitted(true);
-                setFormData({ type: 'NOTE', subjectId: '', title: '', link: '', author: '' });
+                setFormData({ type: 'NOTE', subjectId: '', title: '', description: '', link: '', author: '' });
                 setTimeout(() => setSubmitted(false), 3000);
             } else {
                 throw new Error('Submission failed');
@@ -184,7 +186,7 @@ export function ContributeForm() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="title">Title / Description *</Label>
+                                <Label htmlFor="title">Title *</Label>
                                 <input
                                     id="title"
                                     type="text"
@@ -193,6 +195,17 @@ export function ContributeForm() {
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
                                     required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="description">Description (Optional)</Label>
+                                <textarea
+                                    id="description"
+                                    placeholder="Add a short description regarding the resource..."
+                                    className="w-full rounded-md border p-2 min-h-[80px]"
+                                    value={formData.description}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 />
                             </div>
 

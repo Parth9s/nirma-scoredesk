@@ -59,6 +59,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             await prisma.resource.create({
                 data: {
                     title: contributionData.title,
+                    description: contributionData.description,
                     type: contribution.type,
                     url: contributionData.url, // Keep the webViewLink
                     subjectId: contributionData.subjectId,

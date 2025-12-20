@@ -86,6 +86,7 @@ model SubjectSchedule {
 model Resource {
   id          String       @id @default(uuid())
   title       String
+  description String?      // Optional description
   type        String       // NOTE, PYQ
   url         String
   subjectId   String

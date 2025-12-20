@@ -9,6 +9,7 @@ import { usePreferencesStore } from '@/lib/store';
 interface Resource {
     id: string;
     title: string;
+    description?: string;
     type: 'NOTE' | 'PYQ';
     url: string;
     author?: string;
@@ -116,9 +117,14 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
                                     <Card key={res.id} className="hover:shadow-md transition-shadow group h-full">
                                         <CardContent className="p-4 flex flex-col justify-between h-full gap-4">
                                             <div className="flex items-start gap-4">
-                                                <div>
+                                                <div className="w-full">
                                                     <h3 className="font-semibold text-gray-900 line-clamp-2" title={res.title}>{res.title}</h3>
-                                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 mt-2">
+                                                    {res.description && (
+                                                        <p className="text-xs text-gray-600 mt-1 line-clamp-2" title={res.description}>
+                                                            {res.description}
+                                                        </p>
+                                                    )}
+                                                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 mt-2 border-t pt-2">
                                                         {res.author && (
                                                             <span className="flex items-center gap-1 text-xs">
                                                                 <User className="h-3 w-3" /> {res.author}

@@ -4,14 +4,14 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { title, type, url, subjectId, author } = body; // data payload
+        const { title, description, type, url, subjectId, author } = body; // data payload
 
         // Store contribution as pending
         const contribution = await prisma.contribution.create({
             data: {
                 type,
                 status: 'PENDING',
-                data: JSON.stringify({ title, url, subjectId }), // Store details in JSON string
+                data: JSON.stringify({ title, description, url, subjectId }), // Store details in JSON string
                 submittedBy: author
             }
         });

@@ -109,7 +109,7 @@ export default function CalendarPage() {
     };
 
     return (
-        <div className="space-y-8 p-1">
+        <div className="space-y-8 p-6 md:p-8">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between md:items-end gap-6">
                 <div>

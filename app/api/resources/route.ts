@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         // Extended body to include driveId if available (passed from frontend upload)
-        const { title, type, url, subjectId, author, driveId } = body;
+        const { title, description, type, url, subjectId, author, driveId } = body;
 
         // If a Drive File ID is present, we must organize it!
         if (driveId) {
@@ -63,6 +63,7 @@ export async function POST(request: Request) {
         const resource = await prisma.resource.create({
             data: {
                 title,
+                description,
                 type,
                 url, // Web View Link
                 subjectId,

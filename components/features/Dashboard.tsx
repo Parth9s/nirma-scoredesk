@@ -138,7 +138,7 @@ export function Dashboard() {
                         <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm font-medium text-indigo-900 flex items-center gap-2">
-                                    <Calendar className="h-4 w-4" /> Academic Calendar
+                                    <Calendar className="h-4 w-4" /> Academic Activity Calendar
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>

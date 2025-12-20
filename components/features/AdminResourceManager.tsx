@@ -13,6 +13,7 @@ type ResourceType = 'NOTE' | 'PYQ';
 interface Resource {
     id: string;
     title: string;
+    description?: string;
     type: string;
     url: string;
     subjectId: string;
@@ -63,6 +64,7 @@ export function AdminResourceManager() {
     const [newRes, setNewRes] = useState<{
         title: string;
         type: ResourceType;
+        description?: string;
         url: string;
         driveId?: string; // New field
         subjectId: string;
@@ -73,12 +75,22 @@ export function AdminResourceManager() {
     }>({
         title: '',
         type: 'NOTE',
+        description: '',
         url: '',
         driveId: '',
         subjectId: '',
         semester: 4,
         branch: 'Computer Science & Engineering'
     });
+
+    // State for tracking which contribution is being processed
+    const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+    const handleAction = async (id: string, action: 'APPROVE' | 'REJECT') => {
+        setActionLoadingId(id);
+        await handleContributionAction(id, action);
+        setActionLoadingId(null);
+    };
 
     useEffect(() => {
         fetchData();
@@ -160,6 +172,7 @@ export function AdminResourceManager() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title: finalTitle,
+                    description: newRes.description,
                     type: newRes.type,
                     url: newRes.url,
                     driveId: newRes.driveId, // Pass Drive ID for backend organization
@@ -173,7 +186,7 @@ export function AdminResourceManager() {
             if (res.ok) {
                 toast({ title: 'Success', description: 'Resource added successfully' });
                 setIsAdding(false);
-                setNewRes({ ...newRes, title: '', url: '', driveId: '', subjectId: '' });
+                setNewRes({ ...newRes, title: '', description: '', url: '', driveId: '', subjectId: '' });
                 fetchData(); // Refresh list
             } else {
                 throw new Error('Failed to add');
@@ -207,9 +220,12 @@ export function AdminResourceManager() {
                 toast({ title: action === 'APPROVE' ? 'Approved' : 'Rejected', description: 'Action successful' });
                 setContributions(prev => prev.filter(c => c.id !== id));
                 if (action === 'APPROVE') fetchData(); // Refresh resources
+            } else {
+                const data = await res.json();
+                throw new Error(data.error || 'Server responded with error');
             }
-        } catch (error) {
-            toast({ title: 'Error', description: 'Action failed', variant: 'destructive' });
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message || 'Action failed', variant: 'destructive' });
         }
     };
 
@@ -265,37 +281,55 @@ export function AdminResourceManager() {
                             No pending contributions.
                         </div>
                     ) : (
-                        contributions.map(c => {
-                            const cData = JSON.parse(c.data);
-                            return (
-                                <div key={c.id} className="bg-white p-4 rounded-lg border border-orange-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="p-2 rounded bg-orange-100 text-orange-600">
-                                            <FileText className="h-5 w-5" />
+                        <>
+                            {contributions.map(c => {
+                                const cData = JSON.parse(c.data);
+                                return (
+                                    <div key={c.id} className="bg-white p-4 rounded-lg border border-orange-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="p-2 rounded bg-orange-100 text-orange-600">
+                                                <FileText className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-gray-800">{cData.title}</h3>
+                                                {cData.description && <p className="text-xs text-gray-600 mt-1">{cData.description}</p>}
+                                                <p className="text-sm text-gray-500 mt-1">
+                                                    To: <span className="font-medium text-gray-900">{subjects.find(s => s.id === cData.subjectId)?.name || 'Unknown'}</span>
+                                                    <span className="text-gray-300 mx-2">|</span>
+                                                    <span className="text-xs uppercase bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                                                        {subjects.find(s => s.id === cData.subjectId)?.semester.branch.name} - Sem {subjects.find(s => s.id === cData.subjectId)?.semester.number}
+                                                    </span>
+                                                </p>
+                                                <div className="text-xs text-blue-600 mt-1 font-medium">{c.type}</div>
+                                                <div className="text-xs text-gray-400 mt-1">Submitted by: {c.submittedBy || 'Anonymous'}</div>
+                                                <a href={cData.url} target="_blank" className="text-blue-600 text-xs hover:underline flex items-center mt-1">
+                                                    Review Link <ExternalLink className="h-3 w-3 ml-1" />
+                                                </a>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-semibold text-gray-800">{cData.title}</h3>
-                                            <p className="text-sm text-gray-500">
-                                                To: <span className="font-medium text-gray-900">{subjects.find(s => s.id === cData.subjectId)?.name || 'Unknown'}</span>
-                                                <span className="text-gray-300 mx-2">|</span>
-                                                <span className="text-xs uppercase bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                                                    {subjects.find(s => s.id === cData.subjectId)?.semester.branch.name} - Sem {subjects.find(s => s.id === cData.subjectId)?.semester.number}
-                                                </span>
-                                            </p>
-                                            <div className="text-xs text-blue-600 mt-1 font-medium">{c.type}</div>
-                                            <div className="text-xs text-gray-400 mt-1">Submitted by: {c.submittedBy || 'Anonymous'}</div>
-                                            <a href={cData.url} target="_blank" className="text-blue-600 text-xs hover:underline flex items-center mt-1">
-                                                Review Link <ExternalLink className="h-3 w-3 ml-1" />
-                                            </a>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="text-red-500 border-red-200 hover:bg-red-50"
+                                                onClick={() => handleAction(c.id, 'REJECT')}
+                                                disabled={actionLoadingId === c.id}
+                                            >
+                                                {actionLoadingId === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Reject'}
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-green-600 hover:bg-green-700 text-white"
+                                                onClick={() => handleAction(c.id, 'APPROVE')}
+                                                disabled={actionLoadingId === c.id}
+                                            >
+                                                {actionLoadingId === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Approve'}
+                                            </Button>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button size="sm" variant="outline" className="text-red-500 border-red-200 hover:bg-red-50" onClick={() => handleContributionAction(c.id, 'REJECT')}>Reject</Button>
-                                        <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => handleContributionAction(c.id, 'APPROVE')}>Approve</Button>
-                                    </div>
-                                </div>
-                            );
-                        })
+                                );
+                            })}
+                        </>
                     )}
                 </div>
             ) : (
@@ -385,6 +419,16 @@ export function AdminResourceManager() {
                                     )}
 
                                     <div className="space-y-2">
+                                        <Label>Description</Label>
+                                        <input
+                                            className="w-full border rounded p-2"
+                                            placeholder="Optional description..."
+                                            value={newRes.description || ''}
+                                            onChange={e => setNewRes({ ...newRes, description: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
                                         <Label>Type</Label>
                                         <select className="w-full border rounded p-2 bg-white" value={newRes.type} onChange={e => setNewRes({ ...newRes, type: e.target.value as ResourceType })}>
                                             <option value="NOTE">Note</option>
@@ -450,7 +494,8 @@ export function AdminResourceManager() {
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-800">{res.title}</h3>
-                                        <p className="text-sm text-gray-500">
+                                        {res.description && <p className="text-xs text-gray-600 mt-1">{res.description}</p>}
+                                        <p className="text-sm text-gray-500 mt-1">
                                             {res.subject.name} <span className="text-gray-300">|</span> <span className="font-medium">{res.type}</span>
                                             {res.type === 'PYQ' && ` • ${res.examType} ${res.year}`}
                                         </p>
