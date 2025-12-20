@@ -71,33 +71,39 @@ export function AttendanceCalculator() {
     const getRecommendation = (
         stats: { percentage: number, attended: number, total: number },
         target: number,
-        type: 'Lecture' | 'Lab' | 'Overall'
+        type: 'Lecture' | 'Lab' | 'Overall',
+        maxTotal: number = 100 // Default large limit if not specified
     ) => {
         if (stats.percentage >= target) {
-            const bunks = Math.floor((stats.attended * 100 - target * stats.total) / target);
+            let bunks = Math.floor((stats.attended * 100 - target * stats.total) / target);
+
+            // Limit bunks so that (Current Total + Bunks) <= Max Total
+            const remainingClasses = maxTotal - stats.total;
+            if (bunks > remainingClasses) {
+                bunks = remainingClasses;
+            }
+
             if (bunks <= 0) return { type: 'neutral', msg: 'Maintain.' };
 
-            let msg = `Safe to bunk ${bunks} ${type}${bunks > 1 ? 's' : ''}.`;
-
-            // Equivalency Logic: 2 Lectures = 1 Lab
-            if (type === 'Lecture' && bunks >= 2) {
-                const labs = Math.floor(bunks / 2);
-                msg = `Safe to bunk ${bunks} Lectures / ${labs} Lab${labs > 1 ? 's' : ''}.`;
-            } else if (type === 'Lab' && bunks >= 1) {
-                const lectures = bunks * 2;
-                msg = `Safe to bunk ${bunks} Lab${bunks > 1 ? 's' : ''} / ${lectures} Lectures.`;
-            }
+            // Simple Logic: 1 Lab = 1 Session, 1 Lecture = 1 Session
+            const msg = `Safe to bunk ${bunks} ${type}${bunks > 1 ? 's' : ''}.`; // Removed equivalency logic
 
             return { type: 'success', msg };
         } else {
             const needed = Math.ceil(((target * stats.total) - (100 * stats.attended)) / (100 - target));
+
+            // Check if it's possible to reach target within max limit
+            if ((stats.total + needed) > maxTotal) {
+                return { type: 'danger', msg: `Cannot reach target (Max ${maxTotal} ${type}s).` };
+            }
+
             if (needed <= 0) return { type: 'neutral', msg: 'On track.' };
             return { type: 'danger', msg: `Attend ${needed} ${type}${needed > 1 ? 's' : ''}.` };
         }
     };
 
-    const lectureRec = getRecommendation(lectureStats, targetPercentage, 'Lecture');
-    const labRec = getRecommendation(labStats, targetPercentage, 'Lab');
+    const lectureRec = getRecommendation(lectureStats, targetPercentage, 'Lecture', 30);
+    const labRec = getRecommendation(labStats, targetPercentage, 'Lab', 15);
 
     // Render logic for a single card (used in list)
     const AttendanceCard = ({ record }: { record: AttendanceRecord }) => {
@@ -105,10 +111,18 @@ export function AttendanceCalculator() {
 
         // Map Tutorial to Lab for recommendation logic as requested ("1 lab/tutorial = 2 lecture")
         let recType: 'Lecture' | 'Lab' | 'Overall' = 'Overall';
-        if (record.type === 'Lecture') recType = 'Lecture';
-        else if (record.type === 'Lab' || record.type === 'Tutorial') recType = 'Lab';
+        let maxLimit = 100;
 
-        const rec = getRecommendation(stats, targetPercentage, recType);
+        if (record.type === 'Lecture') {
+            recType = 'Lecture';
+            maxLimit = 30;
+        }
+        else if (record.type === 'Lab' || record.type === 'Tutorial') {
+            recType = 'Lab';
+            maxLimit = 15;
+        }
+
+        const rec = getRecommendation(stats, targetPercentage, recType, maxLimit);
 
         return (
             <div className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -199,10 +213,18 @@ export function AttendanceCalculator() {
                                         <input
                                             type="number"
                                             min="0"
-                                            className="w-full mt-1 rounded-md border-gray-200 bg-gray-50 p-2.5 text-lg font-medium shadow-sm transition-all focus:border-blue-500 focus:ring-blue-500"
+                                            max="30"
+                                            className="w-full mt-1 rounded-md border-gray-200 bg-gray-50 p-2.5 text-lg font-medium shadow-sm transition-all focus:border-slate-500 focus:ring-slate-500"
                                             value={lecture.total || ''}
-                                            onChange={e => setLecture(p => ({ ...p, total: Number(e.target.value) }))}
-                                            placeholder="Total"
+                                            onChange={e => {
+                                                const newTotal = Math.min(30, Math.max(0, Number(e.target.value))); // Max 30
+                                                setLecture(p => ({
+                                                    ...p,
+                                                    total: newTotal,
+                                                    attended: Math.min(p.attended, newTotal) // Clamp attended to not exceed total
+                                                }));
+                                            }}
+                                            placeholder="Max 30"
                                         />
                                     </div>
                                     <div>
@@ -212,7 +234,16 @@ export function AttendanceCalculator() {
                                             min="0"
                                             className="w-full mt-1 rounded-md border-gray-200 bg-white p-2.5 text-lg font-medium shadow-sm transition-all focus:border-green-500 focus:ring-green-500"
                                             value={lecture.attended || ''}
-                                            onChange={e => setLecture(p => ({ ...p, attended: Number(e.target.value) }))}
+                                            onChange={e => {
+                                                const newAttended = Math.max(0, Number(e.target.value));
+                                                // Ensure attended does not exceed total (if total > 0)
+                                                // If total is 0, allow input but it will be clamped when total is set? 
+                                                // Better: If total > 0, clamp. If total is 0, allow user to type but it might be weird.
+                                                // Let's effectively clamp it to total if total is set, otherwise allow.
+                                                // Actually simplest UX: Clamp to Total if Total > 0.
+                                                const limit = lecture.total > 0 ? lecture.total : Number.MAX_SAFE_INTEGER;
+                                                setLecture(p => ({ ...p, attended: Math.min(newAttended, limit) }));
+                                            }}
                                             placeholder="Attended"
                                         />
                                     </div>
@@ -220,7 +251,7 @@ export function AttendanceCalculator() {
 
                                 {/* Recommendation Message */}
                                 <div className={`rounded-lg p-3 text-sm flex items-start gap-3 ${lectureRec.type === 'success' ? 'bg-green-50 text-green-800' :
-                                    lectureRec.type === 'danger' ? 'bg-red-50 text-red-800' : 'bg-yellow-50 text-yellow-800'
+                                    lectureRec.type === 'danger' ? 'bg-red-50 text-red-800' : 'bg-slate-100 text-slate-800'
                                     }`}>
                                     {lectureRec.type === 'success' ? <CheckCircle className="h-5 w-5 shrink-0" /> : <AlertCircle className="h-5 w-5 shrink-0" />}
                                     <span className="font-medium mt-0.5">{lectureRec.msg}</span>
@@ -257,9 +288,16 @@ export function AttendanceCalculator() {
                                                 <input
                                                     type="number"
                                                     min="0"
-                                                    className="w-full mt-1 rounded-md border-gray-200 bg-gray-50 p-2.5 text-lg font-medium shadow-sm transition-all focus:border-blue-500 focus:ring-blue-500"
+                                                    className="w-full mt-1 rounded-md border-gray-200 bg-gray-50 p-2.5 text-lg font-medium shadow-sm transition-all focus:border-slate-500 focus:ring-slate-500"
                                                     value={lab.total || ''}
-                                                    onChange={e => setLab(p => ({ ...p, total: Number(e.target.value) }))}
+                                                    onChange={e => {
+                                                        const newTotal = Math.max(0, Number(e.target.value));
+                                                        setLab(p => ({
+                                                            ...p,
+                                                            total: newTotal,
+                                                            attended: Math.min(p.attended, newTotal) // Clamp attended
+                                                        }));
+                                                    }}
                                                     placeholder="Total"
                                                 />
                                             </div>
@@ -270,13 +308,17 @@ export function AttendanceCalculator() {
                                                     min="0"
                                                     className="w-full mt-1 rounded-md border-gray-200 bg-white p-2.5 text-lg font-medium shadow-sm transition-all focus:border-green-500 focus:ring-green-500"
                                                     value={lab.attended || ''}
-                                                    onChange={e => setLab(p => ({ ...p, attended: Number(e.target.value) }))}
+                                                    onChange={e => {
+                                                        const newAttended = Math.max(0, Number(e.target.value));
+                                                        const limit = lab.total > 0 ? lab.total : Number.MAX_SAFE_INTEGER;
+                                                        setLab(p => ({ ...p, attended: Math.min(newAttended, limit) }));
+                                                    }}
                                                     placeholder="Attended"
                                                 />
                                             </div>
                                         </div>
                                         <div className={`rounded-lg p-3 text-sm flex items-start gap-3 ${labRec.type === 'success' ? 'bg-green-50 text-green-800' :
-                                            labRec.type === 'danger' ? 'bg-red-50 text-red-800' : 'bg-yellow-50 text-yellow-800'
+                                            labRec.type === 'danger' ? 'bg-red-50 text-red-800' : 'bg-slate-100 text-slate-800'
                                             }`}>
                                             {labRec.type === 'success' ? <CheckCircle className="h-5 w-5 shrink-0" /> : <AlertCircle className="h-5 w-5 shrink-0" />}
                                             <span className="font-medium mt-0.5">{labRec.msg}</span>
@@ -288,12 +330,15 @@ export function AttendanceCalculator() {
                             <div className="h-px bg-slate-100" />
 
                             {/* 3. OVERALL SUMMARY */}
-                            <div className="bg-slate-900 text-white rounded-xl p-6 flex flex-col items-center text-center space-y-2">
-                                <h3 className="text-slate-400 font-medium uppercase tracking-widest text-xs">Overall Attendance</h3>
+                            {/* 3. OVERALL SUMMARY */}
+                            {/* 3. OVERALL SUMMARY */}
+                            <div className="bg-slate-100 text-slate-900 rounded-xl p-6 flex flex-col items-center text-center space-y-2">
+                                <h3 className="text-slate-500 font-medium uppercase tracking-widest text-xs">Overall Attendance</h3>
                                 <div className={`text-5xl font-bold ${overallPercentage >= targetPercentage ? 'text-green-400' : 'text-red-400'}`}>
                                     {overallPercentage}%
                                 </div>
-                                <p className="text-slate-400 text-sm">
+
+                                <p className="text-slate-500 text-sm">
                                     {hasLab ? '(Average of Lecture & Lab)' : '(Lecture Only)'}
                                 </p>
                                 {overallPercentage < targetPercentage && (
@@ -318,8 +363,8 @@ export function AttendanceCalculator() {
                         <>
                             <Card className="border-dashed border-2">
                                 <CardContent className="pt-6 flex flex-col items-center justify-center py-12 text-center space-y-4">
-                                    <div className="bg-blue-50 p-4 rounded-full">
-                                        <Upload className="w-8 h-8 text-blue-500" />
+                                    <div className="bg-slate-100 p-4 rounded-full">
+                                        <Upload className="w-8 h-8 text-slate-700" />
                                     </div>
                                     <div className="space-y-2">
                                         <h3 className="font-semibold text-lg">Upload MIS Report</h3>
@@ -336,7 +381,7 @@ export function AttendanceCalculator() {
                                             onChange={handleFileUpload}
                                             disabled={isLoading}
                                         />
-                                        <Button disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+                                        <Button disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
                                             {isLoading ? 'Processing...' : 'Select File'}
                                         </Button>
                                     </div>
@@ -349,16 +394,16 @@ export function AttendanceCalculator() {
                             </Card>
 
                             {/* Instructions Guide */}
-                            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-6">
-                                <h4 className="flex items-center gap-2 font-semibold text-blue-900 mb-4">
-                                    <Info className="w-5 h-5 text-blue-600" />
+                            <div className="bg-slate-50/50 border border-slate-200 rounded-xl p-6">
+                                <h4 className="flex items-center gap-2 font-semibold text-slate-800 mb-4">
+                                    <Info className="w-5 h-5 text-slate-600" />
                                     How to get your Attendance Report?
                                 </h4>
                                 <div className="grid md:grid-cols-2 gap-6">
-                                    <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700 marker:text-blue-500 marker:font-bold">
+                                    <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700 marker:text-slate-900 marker:font-bold">
                                         <li>Login to your <strong>MIS</strong>.</li>
                                         <li>Generate your <span className="font-medium text-slate-900">Attendance Report</span>.</li>
-                                        
+
                                     </ol>
                                     <div className="space-y-2 text-sm text-slate-600">
                                         <p><strong>To save as PDF:</strong> Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono text-xs">Ctrl + P</kbd> and choose "Save as PDF".</p>
@@ -373,27 +418,27 @@ export function AttendanceCalculator() {
                     {importedData.length > 0 && (
                         <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
                             {/* Header Summary */}
-                            <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div className="bg-slate-100 text-slate-900 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                                 <div>
                                     <h2 className="text-2xl font-bold flex items-center gap-2">
-                                        <FileText className="w-6 h-6 text-blue-400" />
+                                        <FileText className="w-6 h-6 text-slate-700" />
                                         Attendance Report
                                     </h2>
-                                    <p className="text-slate-400 text-sm mt-1">
+                                    <p className="text-slate-500 text-sm mt-1">
                                         Found {importedData.length} subjects from your PDF.
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-700">
-                                        <Label className="text-slate-300 text-xs uppercase tracking-wider">Target %</Label>
+                                    <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-1.5 border border-slate-200 shadow-sm">
+                                        <Label className="text-slate-500 text-xs uppercase tracking-wider">Target %</Label>
                                         <input
                                             type="number"
-                                            className="w-12 bg-transparent text-white font-bold text-center border-none focus:ring-0 p-0"
+                                            className="w-12 bg-transparent text-slate-900 font-bold text-center border-none focus:ring-0 p-0"
                                             value={targetPercentage}
                                             onChange={e => setTargetPercentage(Math.max(1, Math.min(100, Number(e.target.value))))}
                                         />
                                     </div>
-                                    <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800" onClick={clearImport}>
+                                    <Button variant="ghost" className="text-slate-500 hover:text-slate-900 hover:bg-slate-200" onClick={clearImport}>
                                         <X className="w-4 h-4 mr-2" /> Clear & Upload New
                                     </Button>
                                 </div>
@@ -404,25 +449,28 @@ export function AttendanceCalculator() {
                                 const criticalSubjects = importedData.filter(record => {
                                     const stats = calculateStats(record.attended, record.total);
                                     let recType: 'Lecture' | 'Lab' | 'Overall' = 'Overall';
-                                    if (record.type === 'Lecture') recType = 'Lecture';
-                                    else if (record.type === 'Lab' || record.type === 'Tutorial') recType = 'Lab';
-                                    return getRecommendation(stats, targetPercentage, recType).type === 'danger';
+                                    let maxLimit = 100;
+                                    if (record.type === 'Lecture') { recType = 'Lecture'; maxLimit = 30; }
+                                    else if (record.type === 'Lab' || record.type === 'Tutorial') { recType = 'Lab'; maxLimit = 15; }
+                                    return getRecommendation(stats, targetPercentage, recType, maxLimit).type === 'danger';
                                 });
 
                                 const safeSubjects = importedData.filter(record => {
                                     const stats = calculateStats(record.attended, record.total);
                                     let recType: 'Lecture' | 'Lab' | 'Overall' = 'Overall';
-                                    if (record.type === 'Lecture') recType = 'Lecture';
-                                    else if (record.type === 'Lab' || record.type === 'Tutorial') recType = 'Lab';
-                                    return getRecommendation(stats, targetPercentage, recType).type === 'success';
+                                    let maxLimit = 100;
+                                    if (record.type === 'Lecture') { recType = 'Lecture'; maxLimit = 30; }
+                                    else if (record.type === 'Lab' || record.type === 'Tutorial') { recType = 'Lab'; maxLimit = 15; }
+                                    return getRecommendation(stats, targetPercentage, recType, maxLimit).type === 'success';
                                 });
 
                                 const maintainSubjects = importedData.filter(record => {
                                     const stats = calculateStats(record.attended, record.total);
                                     let recType: 'Lecture' | 'Lab' | 'Overall' = 'Overall';
-                                    if (record.type === 'Lecture') recType = 'Lecture';
-                                    else if (record.type === 'Lab' || record.type === 'Tutorial') recType = 'Lab';
-                                    return getRecommendation(stats, targetPercentage, recType).type === 'neutral';
+                                    let maxLimit = 100;
+                                    if (record.type === 'Lecture') { recType = 'Lecture'; maxLimit = 30; }
+                                    else if (record.type === 'Lab' || record.type === 'Tutorial') { recType = 'Lab'; maxLimit = 15; }
+                                    return getRecommendation(stats, targetPercentage, recType, maxLimit).type === 'neutral';
                                 });
 
                                 return (
@@ -478,7 +526,7 @@ export function AttendanceCalculator() {
                     )}
                 </TabsContent>
             </Tabs>
-        </div>
+        </div >
     );
 }
 

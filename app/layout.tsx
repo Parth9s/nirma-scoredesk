@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://nirma-scordesk.vercel.app'),
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Nirma ScoreDesk",
-    description: "Academic tools for Nirma University students.",
-    images: ["/icon.png"], // Fallback to icon if no banner exists yet
+    description: "Your academic dashboard for Nirma University.",
+    images: ["/icon.png"], // Same icon
   },
   robots: {
     index: true,
@@ -45,6 +45,16 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Nirma ScoreDesk",
+  },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/icon.png',
   },
   verification: {
     google: "google-site-verification-placeholder", // User can fill this later
@@ -62,7 +72,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${manrope.className} antialiased`}>
         <SessionProvider>
           <GoogleAdSense />
           {children}

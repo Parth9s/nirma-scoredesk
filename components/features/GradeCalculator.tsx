@@ -101,7 +101,7 @@ export function GradeCalculator() {
                     <h2 className="text-2xl font-bold">SGPA Calculator</h2>
                     <p className="text-sm text-gray-500">Based on {branch} Sem {semester} Curriculum</p>
                 </div>
-                <Card className="bg-blue-600 text-white w-48">
+                <Card className="bg-slate-700 text-white w-48">
                     <CardContent className="p-4 flex flex-col items-center justify-center">
                         <span className="text-sm font-medium opacity-90">Projected SGPA</span>
                         <span className="text-3xl font-bold">{calculateSGPA()}</span>
@@ -128,8 +128,8 @@ export function GradeCalculator() {
                                         <div className="text-xs text-gray-500">Credits: {sub.credits}</div>
                                     </div>
                                     <div className="flex flex-col items-end">
-                                        <span className="inline-flex h-10 px-3 items-center justify-center rounded bg-blue-100 text-blue-700 font-bold text-lg border border-blue-200">
-                                            {grade} <span className="ml-1 text-sm font-normal text-blue-600">({point})</span>
+                                        <span className="inline-flex h-10 px-3 items-center justify-center rounded bg-slate-100 text-slate-900 font-bold text-lg border border-slate-200">
+                                            {grade} <span className="ml-1 text-sm font-normal text-slate-600">({point})</span>
                                         </span>
                                         <span className="text-xs text-slate-400 mt-1">
                                             {score.toFixed(1)}%

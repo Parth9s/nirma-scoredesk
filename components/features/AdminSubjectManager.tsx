@@ -219,7 +219,7 @@ export function AdminSubjectManager() {
             </div>
 
             <div className="grid gap-6">
-                {loading && <div className="text-center py-4"><Loader2 className="animate-spin h-6 w-6 mx-auto text-blue-500" /></div>}
+                {loading && <div className="text-center py-4"><Loader2 className="animate-spin h-6 w-6 mx-auto text-slate-500" /></div>}
 
                 {!loading && filteredSubjects.length === 0 && (
                     <div className="text-center py-10 text-gray-400 bg-gray-50 border border-dashed rounded">
@@ -229,7 +229,7 @@ export function AdminSubjectManager() {
                 )}
 
                 {filteredSubjects.map(sub => (
-                    <Card key={sub.id} className="border-l-4 border-l-blue-500">
+                    <Card key={sub.id} className="border-l-4 border-l-slate-900">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             {editingId === sub.id ? (
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2 w-full">
@@ -280,7 +280,7 @@ export function AdminSubjectManager() {
                                 <div className="flex justify-between items-center">
                                     <h4 className="font-semibold text-sm">Evaluation Policy</h4>
                                     {editingId === sub.id && (
-                                        <Button size="sm" variant="ghost" onClick={addComponent} className="text-blue-600 text-xs">
+                                        <Button size="sm" variant="ghost" onClick={addComponent} className="text-slate-600 text-xs hover:text-slate-900">
                                             + Add Component
                                         </Button>
                                     )}

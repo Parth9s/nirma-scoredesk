@@ -42,7 +42,7 @@ export function Onboarding() {
                             <Label htmlFor="branch">Branch</Label>
                             <select
                                 id="branch"
-                                className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
+                                className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-slate-500 focus:outline-none"
                                 value={selectedBranch}
                                 onChange={(e) => setSelectedBranch(e.target.value)}
                             >
@@ -56,7 +56,7 @@ export function Onboarding() {
                             <Label htmlFor="semester">Semester</Label>
                             <select
                                 id="semester"
-                                className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
+                                className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-slate-500 focus:outline-none"
                                 value={selectedSem}
                                 onChange={(e) => setSelectedSem(Number(e.target.value))}
                             >
@@ -66,7 +66,7 @@ export function Onboarding() {
                             </select>
                         </div>
 
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" type="submit">
+                        <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" type="submit">
                             Get Started
                         </Button>
                     </form>

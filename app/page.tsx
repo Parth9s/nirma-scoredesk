@@ -37,7 +37,7 @@ export default function Home() {
   }, [status, session, hasOnboarded, mounted, router]);
 
   if (!mounted || status === 'loading') {
-    return <div className="flex h-screen items-center justify-center bg-gray-50 text-gray-500">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center bg-background text-muted-foreground">Loading...</div>;
   }
 
   // If unauthenticated AND hasn't onboarded, show Onboarding

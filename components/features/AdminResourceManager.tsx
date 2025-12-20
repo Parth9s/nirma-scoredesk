@@ -258,13 +258,13 @@ export function AdminResourceManager() {
                 <div className="flex gap-2">
                     <div className="bg-gray-100 p-1 rounded-lg flex text-sm">
                         <button
-                            className={`px-4 py-1.5 rounded-md transition-all ${activeTab === 'resources' ? 'bg-white shadow text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-900'}`}
+                            className={`px-4 py-1.5 rounded-md transition-all ${activeTab === 'resources' ? 'bg-white shadow text-slate-900 font-medium' : 'text-gray-500 hover:text-gray-900'}`}
                             onClick={() => setActiveTab('resources')}
                         >
                             Active Resources
                         </button>
                         <button
-                            className={`px-4 py-1.5 rounded-md transition-all ${activeTab === 'contributions' ? 'bg-white shadow text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-900'}`}
+                            className={`px-4 py-1.5 rounded-md transition-all ${activeTab === 'contributions' ? 'bg-white shadow text-slate-900 font-medium' : 'text-gray-500 hover:text-gray-900'}`}
                             onClick={() => setActiveTab('contributions')}
                         >
                             Approvals {contributions.length > 0 && <span className="ml-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{contributions.length}</span>}
@@ -300,9 +300,9 @@ export function AdminResourceManager() {
                                                         {subjects.find(s => s.id === cData.subjectId)?.semester.branch.name} - Sem {subjects.find(s => s.id === cData.subjectId)?.semester.number}
                                                     </span>
                                                 </p>
-                                                <div className="text-xs text-blue-600 mt-1 font-medium">{c.type}</div>
+                                                <div className="text-xs text-slate-600 mt-1 font-medium">{c.type}</div>
                                                 <div className="text-xs text-gray-400 mt-1">Submitted by: {c.submittedBy || 'Anonymous'}</div>
-                                                <a href={cData.url} target="_blank" className="text-blue-600 text-xs hover:underline flex items-center mt-1">
+                                                <a href={cData.url} target="_blank" className="text-slate-600 text-xs hover:underline flex items-center mt-1">
                                                     Review Link <ExternalLink className="h-3 w-3 ml-1" />
                                                 </a>
                                             </div>
@@ -341,9 +341,9 @@ export function AdminResourceManager() {
                     </div>
 
                     {/* Global Context Filters */}
-                    <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-slate-50/50 p-4 rounded-lg border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-1">
-                            <Label className="text-xs text-blue-600 font-bold uppercase">Branch</Label>
+                            <Label className="text-xs text-slate-500 font-bold uppercase">Branch</Label>
                             <select
                                 className="w-full border rounded p-2 bg-white text-sm"
                                 value={selectedBranch}
@@ -357,7 +357,7 @@ export function AdminResourceManager() {
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <Label className="text-xs text-blue-600 font-bold uppercase">Semester</Label>
+                            <Label className="text-xs text-slate-500 font-bold uppercase">Semester</Label>
                             <select
                                 className="w-full border rounded p-2 bg-white text-sm"
                                 value={selectedSem}
@@ -370,7 +370,7 @@ export function AdminResourceManager() {
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <Label className="text-xs text-blue-600 font-bold uppercase">Subject Filter</Label>
+                            <Label className="text-xs text-slate-500 font-bold uppercase">Subject Filter</Label>
                             <select
                                 className="w-full border rounded p-2 bg-white text-sm"
                                 value={filterSubject}
@@ -489,7 +489,7 @@ export function AdminResourceManager() {
                         {filteredResources.map(res => (
                             <div key={res.id} className="bg-white p-4 rounded-lg border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex items-start gap-3">
-                                    <div className={`p-2 rounded ${res.type === 'NOTE' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+                                    <div className={`p-2 rounded ${res.type === 'NOTE' ? 'bg-slate-100 text-slate-700' : 'bg-slate-50 text-slate-600'}`}>
                                         <FileText className="h-5 w-5" />
                                     </div>
                                     <div>
@@ -504,7 +504,7 @@ export function AdminResourceManager() {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <a href={res.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center mr-4">
+                                    <a href={res.url} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-600 hover:text-slate-900 hover:underline flex items-center mr-4">
                                         View <ExternalLink className="h-3 w-3 ml-1" />
                                     </a>
                                     <Button size="icon" variant="ghost" className="text-red-500 hover:bg-red-50 hover:text-red-600" onClick={() => handleDelete(res.id)}>

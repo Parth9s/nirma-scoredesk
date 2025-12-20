@@ -150,7 +150,7 @@ export function AdminHolidayManager() {
                                 {holidays.map(holiday => (
                                     <div key={holiday.id} className="flex items-center justify-between p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors">
                                         <div className="flex items-center gap-4">
-                                            <div className="bg-blue-100 text-blue-700 w-12 h-12 flex flex-col items-center justify-center rounded-md text-xs font-bold border border-blue-200">
+                                            <div className="bg-slate-100 text-slate-900 w-12 h-12 flex flex-col items-center justify-center rounded-md text-xs font-bold border border-slate-200">
                                                 <span>{format(new Date(holiday.date), 'MMM')}</span>
                                                 <span className="text-lg leading-none">{format(new Date(holiday.date), 'd')}</span>
                                             </div>

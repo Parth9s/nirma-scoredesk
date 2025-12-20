@@ -236,7 +236,7 @@ export function ContributeForm() {
                                 <p className="text-[10px] text-gray-500">Paste a link OR upload a PDF file.</p>
                             </div>
 
-                            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading || uploading}>
+                            <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white" disabled={loading || uploading}>
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                                 {loading ? 'Submitting...' : 'Submit for Review'}
                             </Button>

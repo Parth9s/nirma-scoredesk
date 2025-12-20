@@ -36,85 +36,101 @@
 }
 
 /* THEME: UNIVERSAL (Landing, Auth, Public Pages) */
+/* "Strict Monochrome" (White, Gray, Black) */
 :root {
   --background: oklch(1 0 0);
   /* Pure White */
-  --foreground: oklch(0.13 0.02 240);
-  /* Deep Blue-Black */
+  --foreground: oklch(0.15 0 0);
+  /* Pure Dark Gray/Black */
+
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.13 0.02 240);
+  /* Pure White */
+  --card-foreground: oklch(0.15 0 0);
+
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.13 0.02 240);
-  --primary: oklch(0.205 0 0);
-  /* Blackish */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+
+  --primary: oklch(0.1 0 0);
+  /* Almost Pure Black */
+  --primary-foreground: oklch(1 0 0);
+  /* Pure White */
+
+  --secondary: oklch(0.96 0 0);
+  /* Light Gray */
+  --secondary-foreground: oklch(0.15 0 0);
+
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.55 0 0);
+  /* Mid Gray */
+
+  --accent: oklch(0.94 0 0);
+  /* Slightly Darker Gray */
+  --accent-foreground: oklch(0.1 0 0);
+
   --destructive: oklch(0.577 0.245 27.325);
+  /* Keep destructive red as warning color */
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.87 0 0);
+
+  --border: oklch(0.9 0 0);
+  /* Neutral Gray Border */
+  --input: oklch(0.9 0 0);
+  --ring: oklch(0.1 0 0);
+
   --radius: 0.625rem;
 
-  /* Sidebar defaults (if used outside dash) */
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.87 0 0);
+  /* Sidebar defaults */
+  --sidebar: oklch(0.98 0 0);
+  /* Very Light Gray */
+  --sidebar-foreground: oklch(0.2 0 0);
+  --sidebar-primary: oklch(0.1 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0 0);
+  --sidebar-accent-foreground: oklch(0.1 0 0);
+  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-ring: oklch(0.1 0 0);
 
-  /* Charts */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* Charts - Grayscale Spectrum */
+  --chart-1: oklch(0.1 0 0);
+  /* Black */
+  --chart-2: oklch(0.4 0 0);
+  /* Dark Gray */
+  --chart-3: oklch(0.6 0 0);
+  /* Mid Gray */
+  --chart-4: oklch(0.8 0 0);
+  /* Light Gray */
+  --chart-5: oklch(0.25 0 0);
+  /* Charcoal */
 }
 
-/* THEME: DASHBOARD (App Interface) - "Soft Corporate" */
-/* THEME: DASHBOARD (App Interface) - "Warm Paper" */
+/* THEME: DASHBOARD (App Interface) - "Strict Monochrome" */
 .dashboard-theme {
-  --background: oklch(0.97 0.02 90);
-  /* Warm Beige/Off-white */
-  --foreground: oklch(0.25 0.05 40);
-  /* Warm Brown-Grey */
+  --background: oklch(0.97 0 0);
+  /* Light Gray Background */
+  --foreground: oklch(0.15 0 0);
 
   --card: oklch(1 0 0);
-  /* White Cards */
-  --card-foreground: oklch(0.25 0.05 40);
+  --card-foreground: oklch(0.15 0 0);
 
-  /* Primary Action: Clay/Terra Cotta */
-  --primary: oklch(0.45 0.12 50);
-  --primary-foreground: oklch(0.98 0.01 90);
+  /* Primary Action: Solid Black */
+  --primary: oklch(0.1 0 0);
+  --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.95 0.03 90);
-  --secondary-foreground: oklch(0.45 0.12 50);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.15 0 0);
 
-  --muted: oklch(0.95 0.02 90);
-  /* Warm Muted */
-  --muted-foreground: oklch(0.5 0.05 40);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.55 0 0);
 
   /* Sidebar Specifics */
-  --sidebar: oklch(0.99 0.005 90);
-  /* Very Light Warm White */
-  --sidebar-foreground: oklch(0.3 0.04 40);
-  --sidebar-primary: oklch(0.45 0.12 50);
-  /* Active Item Clay */
-  --sidebar-primary-foreground: oklch(0.45 0.12 50);
-  /* Clay Text */
-  --sidebar-accent: oklch(0.94 0.03 90);
-  /* Very light warm BG for active item */
-  --sidebar-accent-foreground: oklch(0.45 0.12 50);
+  --sidebar: oklch(1 0 0);
+  /* Pure White Sidebar */
+  --sidebar-foreground: oklch(0.2 0 0);
+  --sidebar-primary: oklch(0.1 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0 0);
+  --sidebar-accent-foreground: oklch(0.1 0 0);
 
-  --sidebar-border: oklch(0.9 0.02 90);
+  --sidebar-border: oklch(0.9 0 0);
 }
 
 .dark {

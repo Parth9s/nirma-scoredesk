@@ -77,7 +77,7 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
     const sortedSubjectNames = Object.keys(groupedResources).sort();
 
     if (loading) {
-        return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
+        return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-slate-600" /></div>;
     }
 
     return (
@@ -109,7 +109,7 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
                     sortedSubjectNames.map(subjectName => (
                         <div key={subjectName} className="space-y-3">
                             <h3 className="text-lg font-semibold text-slate-800 border-b pb-2 flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-blue-500" />
+                                <FileText className="h-5 w-5 text-slate-600" />
                                 {subjectName}
                             </h3>
                             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -140,7 +140,7 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
 
                                             <div className="flex items-center gap-2 pt-2">
                                                 <a href={res.url} target="_blank" rel="noreferrer" className="w-full">
-                                                    <Button size="sm" variant="outline" className="w-full gap-2 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200">
+                                                    <Button size="sm" variant="outline" className="w-full gap-2 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300" asChild>
                                                         <Download className="h-4 w-4" /> Download
                                                     </Button>
                                                 </a>
