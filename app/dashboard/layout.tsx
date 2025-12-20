@@ -15,7 +15,7 @@ export default function DashboardLayout({
     return (
         <div className="min-h-screen dashboard-theme flex flex-col md:flex-row">
             {/* Mobile Header */}
-            <div className="md:hidden flex items-center justify-between p-4 bg-sidebar border-b sticky top-0 z-30">
+            <div className="md:hidden flex items-center justify-between p-4 bg-gradient-to-br from-slate-200 to-white border-b sticky top-0 z-30">
                 <div className="font-bold text-primary">Nirma ScoreDesk</div>
                 <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)}>
                     <Menu className="h-6 w-6" />
@@ -24,7 +24,7 @@ export default function DashboardLayout({
 
             {/* Sidebar (Desktop: Always visible, Mobile: Conditional via Overlay) */}
             <div className={`
-                fixed inset-y-0 left-0 z-[60] w-64 bg-sidebar border-r transform transition-transform duration-200 ease-in-out md:translate-x-0
+                fixed inset-y-0 left-0 z-[60] w-64 bg-gradient-to-br from-slate-200 to-white border-r transform transition-transform duration-200 ease-in-out md:translate-x-0
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:relative md:block
             `}>

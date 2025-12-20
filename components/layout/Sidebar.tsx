@@ -43,7 +43,7 @@ export function Sidebar({ className, onLinkClick }: { className?: string, onLink
                 <h1 className="text-xl font-bold text-sidebar-primary">Nirma ScoreDesk</h1>
             </div>
 
-            <div className="p-4 border-b bg-muted shrink-0">
+            <div className="p-4 border-b bg-white shrink-0">
                 <div className="text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">Current</div>
                 {mounted ? (
                     <>

@@ -35,8 +35,8 @@ export function Dashboard() {
     const calendarUrl = (branch && semester && calendarUrls[branch]?.[semester]) || null;
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <header className="bg-white border-b sticky top-0 z-50">
+        <div className="min-h-screen">
+            <header className="border-b sticky top-0 z-50 backdrop-blur-sm bg-white/50">
                 <div className="h-16 px-6 flex items-center justify-between">
                     <div className="flex-1" /> {/* Spacer to push content to right */}
                     <div className="flex items-center gap-4">
