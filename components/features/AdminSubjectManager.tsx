@@ -42,6 +42,9 @@ export function AdminSubjectManager() {
     const [editForm, setEditForm] = useState<any>({});
     // editForm structure: { name, code, credits, components: EvalComponent[] }
 
+    // Deletion Confirmation State
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
     const fetchSubjects = async () => {
         setLoading(true);
         try {
@@ -99,7 +102,8 @@ export function AdminSubjectManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure? This will delete all resources and data for this subject.')) return;
+        // Double-check UI handled by state
+        setDeleteConfirmId(null);
 
         try {
             const res = await fetch(`/api/subjects/${id}`, { method: 'DELETE' });
@@ -268,9 +272,22 @@ export function AdminSubjectManager() {
                                 ) : (
                                     <div className="flex gap-2">
                                         <Button size="sm" variant="outline" onClick={() => startEdit(sub)}>Edit</Button>
-                                        <Button size="sm" variant="destructive" onClick={() => handleDelete(sub.id)}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+
+                                        {/* Delete Confirmation Logic */}
+                                        {deleteConfirmId === sub.id ? (
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                onClick={() => handleDelete(sub.id)}
+                                                className="animate-in fade-in zoom-in duration-200"
+                                            >
+                                                Confirm?
+                                            </Button>
+                                        ) : (
+                                            <Button size="sm" variant="destructive" onClick={() => setDeleteConfirmId(sub.id)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
                                     </div>
                                 )}
                             </div>

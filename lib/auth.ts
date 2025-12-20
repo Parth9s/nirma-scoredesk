@@ -48,11 +48,20 @@ export const config = {
             return true;
         },
         async jwt({ token, user, profile }) {
-            // Assign Role based on email
-            if (profile?.email === "parthsavaliya1111@gmail.com") {
-                token.role = "ADMIN";
-            } else if (profile?.email?.endsWith("@nirmauni.ac.in")) {
-                token.role = "STUDENT";
+            // 1. Credentials Login (User object is present)
+            if (user) {
+                if (user.email === "parthsavaliya1111@gmail.com") {
+                    token.role = "ADMIN";
+                }
+            }
+
+            // 2. Google Login (Profile object is present)
+            if (profile) {
+                if (profile.email === "parthsavaliya1111@gmail.com") {
+                    token.role = "ADMIN";
+                } else if (profile.email?.endsWith("@nirmauni.ac.in")) {
+                    token.role = "STUDENT";
+                }
             }
             return token;
         },

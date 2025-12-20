@@ -47,7 +47,9 @@ export function Sidebar({ className, onLinkClick }: { className?: string, onLink
                 <div className="text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">Current</div>
                 {mounted ? (
                     <>
-                        <div className="mt-1 font-semibold truncate text-sidebar-foreground">{branch || 'Select Branch'}</div>
+                        <div className="mt-1 font-semibold text-sidebar-foreground marquee-container">
+                            <div className="marquee-content">{branch || 'Select Branch'}</div>
+                        </div>
                         <div className="text-sm text-sidebar-foreground/80">Semester {semester || '-'}</div>
                     </>
                 ) : (
@@ -67,15 +69,15 @@ export function Sidebar({ className, onLinkClick }: { className?: string, onLink
                         className={cn(
                             "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                             pathname === item.href
-                                ? "bg-sidebar-accent text-sidebar-primary"
-                                : "text-sidebar-foreground hover:bg-sidebar-accent/50",
+                                ? "bg-slate-900 text-white shadow-sm"
+                                : "text-sidebar-foreground hover:bg-slate-100",
                             // @ts-ignore
                             item.disabled && "opacity-50 cursor-not-allowed pointer-events-none"
                         )}
                         // @ts-ignore
                         aria-disabled={item.disabled}
                     >
-                        <item.icon className={cn("h-4 w-4", pathname === item.href ? "text-sidebar-primary" : "text-sidebar-foreground")} />
+                        <item.icon className={cn("h-4 w-4", pathname === item.href ? "text-white" : "text-sidebar-foreground")} />
                         {item.label}
                     </Link>
                 ))}

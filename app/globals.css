@@ -171,9 +171,65 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    cursor: default;
+    /* Aggressively remove I-beam from everything */
   }
 
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Restore text cursor ONLY for actual inputs */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+  }
+
+  /* Restore pointer for interactive elements */
+  a,
+  button,
+  [role="button"],
+  label,
+  select,
+  summary {
+    cursor: pointer;
+  }
+}
+
+/* Sidebar Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  /* Fade out effect at the right edge */
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+.marquee-content {
+  display: inline-block;
+  white-space: nowrap;
+  /* Ensure content is wide enough to scroll if needed */
+  min-width: 100%;
+}
+
+/* Only animate on hover */
+.marquee-container:hover .marquee-content {
+  animation: marquee 10s linear infinite;
+  /* Make sure we have enough duplicate content for seamless loop if we were doing that, 
+     but for simple "move to see end", standard translate is okay. 
+     Actually, standard marquee usually requires duplicating text. 
+     For "move horizontally in the box", a simple translate loop works if we assume 
+     it resets. */
 }

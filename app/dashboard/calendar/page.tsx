@@ -245,6 +245,19 @@ export default function CalendarPage() {
                                 </CardContent>
                             </Card>
                         </div>
+
+                        {/* Strategy Explainer */}
+                        <Card className="border-none shadow-md bg-gradient-to-br from-indigo-50 to-white/50 backdrop-blur-xl rounded-3xl ring-1 ring-indigo-100">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-bold text-indigo-900 flex items-center gap-2">
+                                    <Sparkles className="h-4 w-4 text-indigo-600" />
+                                    Strategic Leave Planning
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-xs text-indigo-800 leading-relaxed font-medium">
+                                Optimize your schedule by combining weekends with upcoming holidays. The system automatically identifies opportunities for extended breaks with minimal leave required.
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             )}
