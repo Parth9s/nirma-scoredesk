@@ -177,6 +177,10 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Grayish Linear Gradient (Clean & Visible) */
+    background-image: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
+    /* from-slate-100 to-white */
+    background-attachment: fixed;
   }
 
   /* Restore text cursor ONLY for actual inputs */
