@@ -156,7 +156,7 @@ export default function CalendarPage() {
                             <div className="grid grid-cols-7 gap-2 md:gap-3">
                                 {/* Pad start of month */}
                                 {Array.from({ length: getDay(startOfMonth(currentDate)) }).map((_, i) => (
-                                    <div key={`pad-${i}`} className="h-24 md:h-32 bg-muted/30 rounded-2xl" />
+                                    <div key={`pad-${i}`} className="h-16 md:h-24 bg-muted/30 rounded-2xl" />
                                 ))}
 
                                 {days.map((day, i) => {
@@ -169,28 +169,28 @@ export default function CalendarPage() {
                                         <div
                                             key={i}
                                             className={cn(
-                                                "h-24 md:h-32 border-2 rounded-2xl p-3 flex flex-col justify-between transition-all relative group shadow-sm hover:shadow-md bg-card hover:scale-[1.02] hover:-translate-y-0.5",
+                                                "h-16 md:h-24 border-2 rounded-2xl p-2 md:p-3 flex flex-col justify-between transition-all relative group shadow-sm hover:shadow-md bg-card hover:scale-[1.02] hover:-translate-y-0.5",
                                                 isToday && "border-primary shadow-primary/20 shadow-lg",
                                                 suggestion && "border-emerald-400 bg-emerald-50/50",
                                                 holiday && "border-rose-200 bg-rose-50/50",
-                                                isVacationWeekend && "border-emerald-200 bg-emerald-50/30", // Vacation weekend style
+                                                isVacationWeekend && "border-emerald-200 bg-emerald-50/30",
                                                 !holiday && !suggestion && !isVacationWeekend && isWeekendDay && "border-amber-100/50 bg-amber-50/60",
                                                 !holiday && !suggestion && !isWeekendDay && "border-border"
                                             )}
                                         >
                                             <div className="flex justify-between items-start">
                                                 <span className={cn(
-                                                    "text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full transition-colors",
+                                                    "text-[10px] md:text-sm font-bold w-5 h-5 md:w-7 md:h-7 flex items-center justify-center rounded-full transition-colors",
                                                     isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/30" : "text-muted-foreground group-hover:bg-muted"
                                                 )}>
                                                     {format(day, 'd')}
                                                 </span>
                                             </div>
 
-                                            <div className="space-y-1.5">
+                                            <div className="space-y-1 overflow-hidden">
                                                 {holiday && (
                                                     <div
-                                                        className="text-[10px] md:text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-lg font-bold truncate border border-rose-200/50"
+                                                        className="text-[9px] md:text-xs bg-rose-100 text-rose-700 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold border border-rose-200/50 whitespace-nowrap overflow-hidden [mask-image:linear-gradient(to_right,black_70%,transparent_100%)]"
                                                         title={holiday.name}
                                                     >
                                                         {holiday.name}
@@ -198,16 +198,16 @@ export default function CalendarPage() {
                                                 )}
                                                 {suggestion && (
                                                     <div
-                                                        className="text-[10px] md:text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-lg font-bold flex items-center gap-1 cursor-help border border-emerald-200/50 shadow-sm"
+                                                        className="text-[9px] md:text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold flex items-center gap-1 cursor-help border border-emerald-200/50 shadow-sm whitespace-nowrap overflow-hidden [mask-image:linear-gradient(to_right,black_70%,transparent_100%)]"
                                                         title={suggestion.reason}
                                                     >
-                                                        <Sparkles className="h-3 w-3 text-emerald-600" />
+                                                        <Sparkles className="h-3 w-3 text-emerald-600 shrink-0" />
                                                         Take Leave!
                                                     </div>
                                                 )}
                                                 {isVacationWeekend && (
-                                                    <div className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
-                                                        <Sun className="h-3 w-3" />
+                                                    <div className="text-[9px] text-emerald-600 font-medium flex items-center gap-1 whitespace-nowrap overflow-hidden [mask-image:linear-gradient(to_right,black_70%,transparent_100%)]">
+                                                        <Sun className="h-3 w-3 shrink-0" />
                                                         Long Weekend
                                                     </div>
                                                 )}
