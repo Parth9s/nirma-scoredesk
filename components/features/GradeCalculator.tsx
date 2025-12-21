@@ -39,8 +39,10 @@ export function GradeCalculator() {
     const { subjects, fetchSubjects } = useAdminStore();
 
     useEffect(() => {
-        fetchSubjects();
-    }, []);
+        if (branch && semester) {
+            fetchSubjects(branch, semester);
+        }
+    }, [branch, semester, fetchSubjects]);
 
     // Filter relevant subjects (and exclude 0 credit subjects)
     const mySubjects = subjects.filter(s =>

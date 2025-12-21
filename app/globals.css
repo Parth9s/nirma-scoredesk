@@ -228,10 +228,14 @@
 
 /* Only animate on hover */
 .marquee-container:hover .marquee-content {
-  animation: marquee 10s linear infinite;
+  animation: marquee 7s linear infinite;
   /* Make sure we have enough duplicate content for seamless loop if we were doing that, 
      but for simple "move to see end", standard translate is okay. 
      Actually, standard marquee usually requires duplicating text. 
      For "move horizontally in the box", a simple translate loop works if we assume 
      it resets. */
+}
+
+.marquee-fast:hover .marquee-content {
+  animation-duration: 1s;
 }

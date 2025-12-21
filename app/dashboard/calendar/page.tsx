@@ -190,7 +190,7 @@ export default function CalendarPage() {
                                             <div className="space-y-1 overflow-hidden">
                                                 {holiday && (
                                                     <div
-                                                        className="marquee-container text-[9px] md:text-xs bg-rose-100 text-rose-700 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold border border-rose-200/50"
+                                                        className="marquee-container marquee-fast text-[9px] md:text-xs bg-rose-100 text-rose-700 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold border border-rose-200/50"
                                                         title={holiday.name}
                                                     >
                                                         <div className="marquee-content">{holiday.name}</div>
@@ -198,7 +198,7 @@ export default function CalendarPage() {
                                                 )}
                                                 {suggestion && (
                                                     <div
-                                                        className="marquee-container text-[9px] md:text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold flex items-center gap-1 cursor-help border border-emerald-200/50 shadow-sm"
+                                                        className="marquee-container marquee-fast text-[9px] md:text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold flex items-center gap-1 cursor-help border border-emerald-200/50 shadow-sm"
                                                         title={suggestion.reason}
                                                     >
                                                         <div className="marquee-content flex items-center gap-1">
@@ -208,7 +208,7 @@ export default function CalendarPage() {
                                                     </div>
                                                 )}
                                                 {isVacationWeekend && (
-                                                    <div className="marquee-container text-[9px] text-emerald-600 font-medium flex items-center gap-1">
+                                                    <div className="marquee-container marquee-fast text-[9px] text-emerald-600 font-medium flex items-center gap-1">
                                                         <div className="marquee-content flex items-center gap-1">
                                                             <Sun className="h-3 w-3 shrink-0" />
                                                             Long Weekend

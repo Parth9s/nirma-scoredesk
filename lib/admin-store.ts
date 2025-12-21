@@ -28,7 +28,7 @@ export interface Subject {
 interface AdminStore {
     subjects: Subject[];
     calendarUrls: Record<string, Record<number, string>>; // Branch -> Sem -> URL
-    fetchSubjects: () => Promise<void>;
+    fetchSubjects: (branch?: string, semester?: number) => Promise<void>;
     fetchCalendarUrl: (branch: string, sem: number) => Promise<void>;
 
     // Actions - Subjects
@@ -57,9 +57,18 @@ export const useAdminStore = create<AdminStore>()(
             calendarUrls: {},
 
             // --- SUBJECT ACTIONS ---
-            fetchSubjects: async () => {
+            fetchSubjects: async (branch?: string, semester?: number) => {
                 try {
-                    const res = await fetch('/api/subjects', { cache: 'no-store' });
+                    let url = '/api/subjects';
+                    const params = new URLSearchParams();
+                    if (branch) params.append('branch', branch);
+                    if (semester) params.append('semester', semester.toString());
+
+                    if (params.toString()) {
+                        url += `?${params.toString()}`;
+                    }
+
+                    const res = await fetch(url, { cache: 'no-store' });
                     if (res.ok) {
                         const data = await res.json();
                         if (Array.isArray(data)) {

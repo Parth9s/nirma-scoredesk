@@ -2,13 +2,34 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET: Fetch all subjects with relations
-export async function GET() {
+// GET: Fetch all subjects with filtering
+export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const branchName = searchParams.get('branch');
+        const semesterNumber = searchParams.get('semester');
+
+        const whereClause: any = {};
+
+        if (branchName || semesterNumber) {
+            whereClause.semester = {};
+
+            if (semesterNumber) {
+                whereClause.semester.number = parseInt(semesterNumber);
+            }
+
+            if (branchName) {
+                whereClause.semester.branch = {
+                    name: branchName
+                };
+            }
+        }
+
         const subjects = await prisma.subject.findMany({
+            where: whereClause,
             include: {
                 semester: { include: { branch: true } },
-                evaluationConfigs: true // Use correct relation name
+                evaluationConfigs: true
             },
             orderBy: { name: 'asc' }
         });

@@ -5,17 +5,29 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const subjectId = searchParams.get('subjectId');
     const type = searchParams.get('type');
+    const branchName = searchParams.get('branch');
+    const semesterNumber = searchParams.get('semester');
 
-    // if (!subjectId) {
-    //    return NextResponse.json({ error: 'Subject ID required' }, { status: 400 });
-    // }
+    const whereClause: any = {
+        subjectId: subjectId || undefined,
+        type: type ? (type as any) : undefined
+    };
+
+    if (branchName || semesterNumber) {
+        whereClause.subject = { semester: {} };
+
+        if (semesterNumber) {
+            whereClause.subject.semester.number = parseInt(semesterNumber);
+        }
+
+        if (branchName) {
+            whereClause.subject.semester.branch = { name: branchName };
+        }
+    }
 
     try {
         const resources = await prisma.resource.findMany({
-            where: {
-                subjectId: subjectId || undefined,
-                type: type ? (type as any) : undefined
-            },
+            where: whereClause,
             include: { subject: { include: { semester: { include: { branch: true } } } } },
             orderBy: { uploadedAt: 'desc' }
         });

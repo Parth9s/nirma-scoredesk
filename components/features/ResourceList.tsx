@@ -35,9 +35,12 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
         const fetchResources = async () => {
             setLoading(true);
             try {
-                // Fetch all resources of this type
-                // The API supports ?type=... filtering
-                const res = await fetch(`/api/resources?type=${type}`);
+                // Fetch resources with specific filtering
+                let url = `/api/resources?type=${type}`;
+                if (branch) url += `&branch=${encodeURIComponent(branch)}`;
+                if (semester) url += `&semester=${semester}`;
+
+                const res = await fetch(url);
                 if (res.ok) {
                     const data = await res.json();
                     setResources(data);
@@ -50,7 +53,7 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
         };
 
         fetchResources();
-    }, [type]);
+    }, [type, branch, semester]);
 
     // Filter by User Preferences (Branch/Sem) AND Local Search Input
     const filteredResources = resources.filter(r => {
