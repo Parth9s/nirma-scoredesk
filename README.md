@@ -14,7 +14,7 @@
 
 ### 📊 Academic Tracking
 - **SGPA Calculator**: Real-time SGPA prediction based on current marks and semester curriculum.
-- **Attendance Manager**: "Safe to Bunk" calculator helping students maintain the mandatory 75% threshold.
+- **Attendance Manager**: "Safe to Bunk" calculator helping students maintain the mandatory 85% threshold.
 - **Grade Analytics**: Visual breakdown of grades across subjects.
 
 ### 📚 Resource Hub
