@@ -180,7 +180,7 @@ export default function CalendarPage() {
                                         >
                                             <div className="flex justify-between items-start">
                                                 <span className={cn(
-                                                    "text-[10px] md:text-sm font-bold w-5 h-5 md:w-7 md:h-7 flex items-center justify-center rounded-full transition-colors",
+                                                    "text-[10px] md:text-sm font-bold w-6 h-6 md:w-7 md:h-7 shrink-0 flex items-center justify-center rounded-full transition-colors",
                                                     isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/30" : "text-muted-foreground group-hover:bg-muted"
                                                 )}>
                                                     {format(day, 'd')}
@@ -190,25 +190,29 @@ export default function CalendarPage() {
                                             <div className="space-y-1 overflow-hidden">
                                                 {holiday && (
                                                     <div
-                                                        className="text-[9px] md:text-xs bg-rose-100 text-rose-700 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold border border-rose-200/50 whitespace-nowrap overflow-hidden [mask-image:linear-gradient(to_right,black_70%,transparent_100%)]"
+                                                        className="marquee-container text-[9px] md:text-xs bg-rose-100 text-rose-700 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold border border-rose-200/50"
                                                         title={holiday.name}
                                                     >
-                                                        {holiday.name}
+                                                        <div className="marquee-content">{holiday.name}</div>
                                                     </div>
                                                 )}
                                                 {suggestion && (
                                                     <div
-                                                        className="text-[9px] md:text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold flex items-center gap-1 cursor-help border border-emerald-200/50 shadow-sm whitespace-nowrap overflow-hidden [mask-image:linear-gradient(to_right,black_70%,transparent_100%)]"
+                                                        className="marquee-container text-[9px] md:text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold flex items-center gap-1 cursor-help border border-emerald-200/50 shadow-sm"
                                                         title={suggestion.reason}
                                                     >
-                                                        <Sparkles className="h-3 w-3 text-emerald-600 shrink-0" />
-                                                        Take Leave!
+                                                        <div className="marquee-content flex items-center gap-1">
+                                                            <Sparkles className="h-3 w-3 text-emerald-600 shrink-0" />
+                                                            Take Leave!
+                                                        </div>
                                                     </div>
                                                 )}
                                                 {isVacationWeekend && (
-                                                    <div className="text-[9px] text-emerald-600 font-medium flex items-center gap-1 whitespace-nowrap overflow-hidden [mask-image:linear-gradient(to_right,black_70%,transparent_100%)]">
-                                                        <Sun className="h-3 w-3 shrink-0" />
-                                                        Long Weekend
+                                                    <div className="marquee-container text-[9px] text-emerald-600 font-medium flex items-center gap-1">
+                                                        <div className="marquee-content flex items-center gap-1">
+                                                            <Sun className="h-3 w-3 shrink-0" />
+                                                            Long Weekend
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>

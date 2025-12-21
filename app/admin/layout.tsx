@@ -34,7 +34,7 @@ export default function AdminLayout({
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="min-h-screen flex">
             {/* Admin Sidebar */}
             <aside className="w-64 bg-slate-900 text-white flex flex-col">
                 <div className="h-16 flex items-center px-6 border-b border-slate-700">
