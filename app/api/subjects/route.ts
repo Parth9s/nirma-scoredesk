@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
 
 // GET: Fetch all subjects with filtering
 export async function GET(request: Request) {
@@ -43,6 +44,11 @@ export async function GET(request: Request) {
 // POST: Create new subject
 export async function POST(request: Request) {
     try {
+        const session = await auth();
+        if (!session || !session.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const { name, code, credits, branchName, semesterNumber } = body;
 

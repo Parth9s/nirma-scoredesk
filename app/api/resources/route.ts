@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -39,6 +40,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
+        const session = await auth();
+        if (!session || !session.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         // Extended body to include driveId if available (passed from frontend upload)
         const { title, description, type, url, subjectId, author, driveId } = body;
@@ -80,8 +86,23 @@ export async function POST(request: Request) {
                 url, // Web View Link
                 subjectId,
                 author: author || 'Admin'
+            },
+            include: {
+                subject: true // Include subject to get name for email
             }
         });
+
+        // Send Notification Email (Async - don't await/block response)
+        // We import dynamically to avoid circular deps if any, though lib/mail is clean
+        import('@/lib/mail').then(({ sendNotificationEmail }) => {
+            sendNotificationEmail(
+                resource.title,
+                resource.type,
+                resource.author || 'Admin',
+                resource.subject.name
+            );
+        }).catch(err => console.error("Failed to trigger email:", err));
+
         return NextResponse.json(resource);
     } catch (error) {
         console.error("Create Resource Error:", error);
