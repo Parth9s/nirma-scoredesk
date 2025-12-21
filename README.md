@@ -49,4 +49,4 @@
 
 ---
 
-### © 2024 Parth Savaliya. All Rights Reserved.
+### © 2025 Parth Savaliya. All Rights Reserved.
