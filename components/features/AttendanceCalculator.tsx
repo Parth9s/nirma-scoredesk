@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseMISReport, AttendanceRecord } from '@/lib/mis-parser';
+import { cn } from '@/lib/utils';
 
 export function AttendanceCalculator() {
     // Mode: 'generic' (default) or 'imported' (list)
@@ -166,114 +167,127 @@ export function AttendanceCalculator() {
 
             <Tabs defaultValue="single" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-8 h-12">
-                    <TabsTrigger value="single" className="text-base gap-2">
+                    <TabsTrigger value="single" className="text-xs md:text-base gap-2">
                         <Calculator className="w-4 h-4" /> One Subject
                     </TabsTrigger>
-                    <TabsTrigger value="import" className="text-base gap-2">
+                    <TabsTrigger value="import" className="text-xs md:text-base gap-2">
                         <FileText className="w-4 h-4" /> All Subjects (Import)
                     </TabsTrigger>
                 </TabsList>
 
                 {/* TAB 1: SINGLE SUBJECT */}
                 <TabsContent value="single">
-                    <Card className="shadow-md border-slate-200">
-                        <CardHeader className="bg-slate-50/50 pb-4 border-b">
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <CardTitle>Single Subject Calculator</CardTitle>
-                                    <CardDescription>
-                                        Enter details for one subject to check bunks.
+                    <Card className="shadow-none border-none bg-transparent md:shadow-md md:border md:bg-card">
+                        <CardHeader className="px-0 md:px-6 pb-2 md:pb-4 md:bg-muted/30 border-b-0 md:border-b">
+                            <div className="flex flex-row justify-between items-start gap-4">
+                                <div className="space-y-1 flex-1">
+                                    <CardTitle className="text-xl md:text-2xl">Attendance Goal</CardTitle>
+                                    <CardDescription className="text-xs md:text-sm">
+                                        Check if you can bunk or need to attend.
                                     </CardDescription>
                                 </div>
-                                <div className="flex items-center gap-2 border-l pl-3 ml-1">
-                                    <Label className="text-sm">Target %</Label>
-                                    <input
-                                        type="number"
-                                        className="w-16 rounded border-gray-300 p-1 text-sm md:text-base text-center font-bold"
-                                        value={targetPercentage}
-                                        onChange={e => setTargetPercentage(Math.max(1, Math.min(100, Number(e.target.value))))}
-                                    />
+                                <div className="flex flex-col items-center gap-1.5 shrink-0 bg-white md:bg-transparent p-2 md:p-0 rounded-xl border md:border-none shadow-sm md:shadow-none min-w-[80px]">
+                                    <Label className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-bold">Target</Label>
+                                    <div className="relative flex items-center justify-center">
+                                        <input
+                                            type="number"
+                                            className="w-12 md:w-16 bg-transparent text-center font-extrabold text-xl md:text-2xl border-none p-0 focus:ring-0 text-primary"
+                                            value={targetPercentage}
+                                            onChange={e => {
+                                                const val = parseInt(e.target.value) || 0;
+                                                // Allow user to type 0-100 without immediate clamping if it disrupts typing (though for 100 it's fine)
+                                                // We'll clamp 0-100 strictly
+                                                setTargetPercentage(Math.max(0, Math.min(100, val)));
+                                            }}
+                                        />
+                                        <span className="text-sm md:text-base font-medium text-muted-foreground ml-0.5">%</span>
+                                    </div>
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="pt-6 space-y-8">
+                        <CardContent className="px-0 md:px-6 pt-2 md:pt-6 space-y-6 md:space-y-8">
                             {/* 1. LECTURE SECTION */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 font-semibold text-lg text-slate-700">
-                                        <BookOpen className="w-5 h-5" /> Lecture
+                            <div className="space-y-4 bg-white p-4 md:p-0 rounded-2xl border md:border-none shadow-sm md:shadow-none">
+                                <div className="flex items-center justify-between border-b pb-3 md:border-b-0 md:pb-0">
+                                    <div className="flex items-center gap-2.5 font-bold text-lg text-slate-800">
+                                        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                                            <BookOpen className="w-5 h-5" />
+                                        </div>
+                                        Lecture
                                     </div>
-                                    <div className={`text-xl font-bold ${lectureStats.percentage >= targetPercentage ? 'text-green-600' : 'text-red-600'}`}>
+                                    <div className={cn("text-2xl font-black", lectureStats.percentage >= targetPercentage ? 'text-emerald-500' : 'text-rose-500')}>
                                         {lectureStats.percentage}%
                                     </div>
                                 </div>
+
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label className="text-xs text-gray-500 uppercase tracking-wider">Total Lect.</Label>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Total</Label>
                                         <input
                                             type="number"
                                             min="0"
                                             max="30"
-                                            className="w-full mt-1 rounded-md border-gray-200 bg-gray-50 p-2.5 text-lg font-medium shadow-sm transition-all focus:border-slate-500 focus:ring-slate-500"
+                                            className="w-full text-center rounded-xl border-slate-200 bg-slate-50/50 p-3 text-lg font-bold shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all"
                                             value={lecture.total || ''}
                                             onChange={e => {
-                                                const newTotal = Math.min(30, Math.max(0, Number(e.target.value))); // Max 30
+                                                const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                                const newTotal = Math.min(30, Math.max(0, val));
                                                 setLecture(p => ({
                                                     ...p,
                                                     total: newTotal,
-                                                    attended: Math.min(p.attended, newTotal) // Clamp attended to not exceed total
+                                                    attended: Math.min(p.attended, newTotal)
                                                 }));
                                             }}
                                             placeholder="Max 30"
                                         />
                                     </div>
-                                    <div>
-                                        <Label className="text-xs text-gray-500 uppercase tracking-wider">Attended</Label>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Attended</Label>
                                         <input
                                             type="number"
                                             min="0"
-                                            className="w-full mt-1 rounded-md border-gray-200 bg-white p-2.5 text-lg font-medium shadow-sm transition-all focus:border-green-500 focus:ring-green-500"
+                                            className="w-full text-center rounded-xl border-slate-200 bg-white p-3 text-lg font-bold shadow-sm focus:border-emerald-500 focus:ring-emerald-500 transition-all"
                                             value={lecture.attended || ''}
                                             onChange={e => {
-                                                const newAttended = Math.max(0, Number(e.target.value));
-                                                // Ensure attended does not exceed total (if total > 0)
-                                                // If total is 0, allow input but it will be clamped when total is set? 
-                                                // Better: If total > 0, clamp. If total is 0, allow user to type but it might be weird.
-                                                // Let's effectively clamp it to total if total is set, otherwise allow.
-                                                // Actually simplest UX: Clamp to Total if Total > 0.
-                                                const limit = lecture.total > 0 ? lecture.total : Number.MAX_SAFE_INTEGER;
-                                                setLecture(p => ({ ...p, attended: Math.min(newAttended, limit) }));
+                                                const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                                const limit = lecture.total > 0 ? lecture.total : 30;
+                                                setLecture(p => ({ ...p, attended: Math.min(val, limit) }));
                                             }}
-                                            placeholder="Attended"
+                                            placeholder="0"
                                         />
                                     </div>
                                 </div>
 
                                 {/* Recommendation Message */}
-                                <div className={`rounded-lg p-3 text-sm flex items-start gap-3 ${lectureRec.type === 'success' ? 'bg-green-50 text-green-800' :
-                                    lectureRec.type === 'danger' ? 'bg-red-50 text-red-800' : 'bg-slate-100 text-slate-800'
-                                    }`}>
-                                    {lectureRec.type === 'success' ? <CheckCircle className="h-5 w-5 shrink-0" /> : <AlertCircle className="h-5 w-5 shrink-0" />}
-                                    <span className="font-medium mt-0.5">{lectureRec.msg}</span>
+                                <div className={cn(
+                                    "rounded-xl p-3.5 text-sm flex items-start gap-3 font-medium leading-normal",
+                                    lectureRec.type === 'success' ? 'bg-emerald-50/80 text-emerald-800 border border-emerald-100' :
+                                        lectureRec.type === 'danger' ? 'bg-rose-50/80 text-rose-800 border border-rose-100' :
+                                            'bg-slate-50 text-slate-700 border border-slate-100'
+                                )}>
+                                    {lectureRec.type === 'success' ? <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600" /> : <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />}
+                                    <span className="mt-0.5">{lectureRec.msg}</span>
                                 </div>
                             </div>
 
                             <div className="h-px bg-slate-100" />
 
                             {/* 2. LAB SECTION */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 font-semibold text-lg text-slate-700">
-                                        <FlaskConical className="w-5 h-5" />
+                            <div className="space-y-4 bg-white p-4 md:p-0 rounded-2xl border md:border-none shadow-sm md:shadow-none">
+                                <div className="flex items-center justify-between border-b pb-3 md:border-b-0 md:pb-0">
+                                    <div className="flex items-center gap-2.5 font-bold text-lg text-slate-800">
+                                        <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                                            <FlaskConical className="w-5 h-5" />
+                                        </div>
                                         <span>Lab / Tutorial</span>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center gap-2 text-sm text-gray-500">
                                             <Switch checked={hasLab} onCheckedChange={setHasLab} id="lab-mode" />
-                                            <Label htmlFor="lab-mode" className="cursor-pointer">Enable</Label>
+                                            <Label htmlFor="lab-mode" className="cursor-pointer text-xs uppercase tracking-wider font-semibold">Enable</Label>
                                         </div>
                                         {hasLab && (
-                                            <div className={`text-xl font-bold ${labStats.percentage >= targetPercentage ? 'text-green-600' : 'text-red-600'}`}>
+                                            <div className={cn("text-2xl font-black", labStats.percentage >= targetPercentage ? 'text-emerald-500' : 'text-rose-500')}>
                                                 {labStats.percentage}%
                                             </div>
                                         )}
@@ -281,47 +295,53 @@ export function AttendanceCalculator() {
                                 </div>
 
                                 {hasLab && (
-                                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            <div>
-                                                <Label className="text-xs text-gray-500 uppercase tracking-wider">Total Lab</Label>
+                                    <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4 md:space-y-8">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Total</Label>
                                                 <input
                                                     type="number"
                                                     min="0"
-                                                    className="w-full mt-1 rounded-md border-gray-200 bg-gray-50 p-2.5 text-lg font-medium shadow-sm transition-all focus:border-slate-500 focus:ring-slate-500"
+                                                    max="30"
+                                                    className="w-full text-center rounded-xl border-slate-200 bg-slate-50/50 p-3 text-lg font-bold shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all"
                                                     value={lab.total || ''}
                                                     onChange={e => {
-                                                        const newTotal = Math.max(0, Number(e.target.value));
+                                                        const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                                        const newTotal = Math.min(30, Math.max(0, val));
                                                         setLab(p => ({
                                                             ...p,
                                                             total: newTotal,
-                                                            attended: Math.min(p.attended, newTotal) // Clamp attended
+                                                            attended: Math.min(p.attended, newTotal)
                                                         }));
                                                     }}
-                                                    placeholder="Total"
+                                                    placeholder="Max 30"
                                                 />
                                             </div>
-                                            <div>
-                                                <Label className="text-xs text-gray-500 uppercase tracking-wider">Attended</Label>
+                                            <div className="space-y-1.5">
+                                                <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Attended</Label>
                                                 <input
                                                     type="number"
                                                     min="0"
-                                                    className="w-full mt-1 rounded-md border-gray-200 bg-white p-2.5 text-lg font-medium shadow-sm transition-all focus:border-green-500 focus:ring-green-500"
+                                                    className="w-full text-center rounded-xl border-slate-200 bg-white p-3 text-lg font-bold shadow-sm focus:border-emerald-500 focus:ring-emerald-500 transition-all"
                                                     value={lab.attended || ''}
                                                     onChange={e => {
-                                                        const newAttended = Math.max(0, Number(e.target.value));
-                                                        const limit = lab.total > 0 ? lab.total : Number.MAX_SAFE_INTEGER;
-                                                        setLab(p => ({ ...p, attended: Math.min(newAttended, limit) }));
+                                                        const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                                        const limit = lab.total > 0 ? lab.total : 30;
+                                                        setLab(p => ({ ...p, attended: Math.min(val, limit) }));
                                                     }}
-                                                    placeholder="Attended"
+                                                    placeholder="0"
                                                 />
                                             </div>
                                         </div>
-                                        <div className={`rounded-lg p-3 text-sm flex items-start gap-3 ${labRec.type === 'success' ? 'bg-green-50 text-green-800' :
-                                            labRec.type === 'danger' ? 'bg-red-50 text-red-800' : 'bg-slate-100 text-slate-800'
-                                            }`}>
-                                            {labRec.type === 'success' ? <CheckCircle className="h-5 w-5 shrink-0" /> : <AlertCircle className="h-5 w-5 shrink-0" />}
-                                            <span className="font-medium mt-0.5">{labRec.msg}</span>
+
+                                        <div className={cn(
+                                            "rounded-xl p-3.5 text-sm flex items-start gap-3 font-medium leading-normal",
+                                            labRec.type === 'success' ? 'bg-emerald-50/80 text-emerald-800 border border-emerald-100' :
+                                                labRec.type === 'danger' ? 'bg-rose-50/80 text-rose-800 border border-rose-100' :
+                                                    'bg-slate-50 text-slate-700 border border-slate-100'
+                                        )}>
+                                            {labRec.type === 'success' ? <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600" /> : <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />}
+                                            <span className="mt-0.5">{labRec.msg}</span>
                                         </div>
                                     </div>
                                 )}

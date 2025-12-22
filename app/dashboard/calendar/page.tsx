@@ -142,8 +142,8 @@ export default function CalendarPage() {
                 <div className="grid lg:grid-cols-4 gap-8">
                     {/* Calendar Grid */}
                     <Card className="lg:col-span-3 border-none shadow-none bg-card/80 backdrop-blur-xl ring-1 ring-border/50 rounded-3xl overflow-hidden">
-                        <CardContent className="p-6 md:p-8">
-                            <div className="grid grid-cols-7 mb-6 text-center text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                        <CardContent className="p-3 md:p-8">
+                            <div className="grid grid-cols-7 mb-4 md:mb-6 text-center text-[10px] md:text-sm font-bold text-muted-foreground uppercase tracking-widest">
                                 <div>Sun</div>
                                 <div>Mon</div>
                                 <div>Tue</div>
@@ -153,10 +153,10 @@ export default function CalendarPage() {
                                 <div>Sat</div>
                             </div>
 
-                            <div className="grid grid-cols-7 gap-2 md:gap-3">
+                            <div className="grid grid-cols-7 gap-1 md:gap-3">
                                 {/* Pad start of month */}
                                 {Array.from({ length: getDay(startOfMonth(currentDate)) }).map((_, i) => (
-                                    <div key={`pad-${i}`} className="h-16 md:h-24 bg-muted/30 rounded-2xl" />
+                                    <div key={`pad-${i}`} className="aspect-square md:aspect-auto md:h-24 bg-muted/30 rounded-lg md:rounded-2xl" />
                                 ))}
 
                                 {days.map((day, i) => {
@@ -169,7 +169,7 @@ export default function CalendarPage() {
                                         <div
                                             key={i}
                                             className={cn(
-                                                "h-16 md:h-24 border-2 rounded-2xl p-2 md:p-3 flex flex-col justify-between transition-all relative group shadow-sm hover:shadow-md bg-card hover:scale-[1.02] hover:-translate-y-0.5",
+                                                "aspect-square md:aspect-auto md:h-24 border md:border-2 rounded-lg md:rounded-2xl p-1 md:p-3 flex flex-col justify-between transition-all relative group shadow-sm hover:shadow-md bg-card hover:scale-[1.02] hover:-translate-y-0.5",
                                                 isToday && "border-primary shadow-primary/20 shadow-lg",
                                                 suggestion && "border-emerald-400 bg-emerald-50/50",
                                                 holiday && "border-rose-200 bg-rose-50/50",
@@ -180,25 +180,38 @@ export default function CalendarPage() {
                                         >
                                             <div className="flex justify-between items-start">
                                                 <span className={cn(
-                                                    "text-[10px] md:text-sm font-bold w-6 h-6 md:w-7 md:h-7 shrink-0 flex items-center justify-center rounded-full transition-colors",
+                                                    "text-[10px] md:text-sm font-bold w-5 h-5 md:w-7 md:h-7 shrink-0 flex items-center justify-center rounded-full transition-colors",
                                                     isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/30" : "text-muted-foreground group-hover:bg-muted"
                                                 )}>
                                                     {format(day, 'd')}
                                                 </span>
                                             </div>
 
-                                            <div className="space-y-1 overflow-hidden">
+                                            <div className="space-y-0.5 md:space-y-1 overflow-hidden flex flex-col justify-end h-full pb-0.5">
                                                 {holiday && (
                                                     <div
-                                                        className="marquee-container marquee-fast text-[9px] md:text-xs bg-rose-100 text-rose-700 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold border border-rose-200/50"
+                                                        className="md:hidden w-1.5 h-1.5 rounded-full bg-rose-500 mx-auto"
+                                                        title={holiday.name}
+                                                    />
+                                                )}
+                                                {holiday && (
+                                                    <div
+                                                        className="hidden md:block marquee-container marquee-fast text-[9px] md:text-xs bg-rose-100 text-rose-700 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold border border-rose-200/50"
                                                         title={holiday.name}
                                                     >
                                                         <div className="marquee-content">{holiday.name}</div>
                                                     </div>
                                                 )}
+
                                                 {suggestion && (
                                                     <div
-                                                        className="marquee-container marquee-fast text-[9px] md:text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold flex items-center gap-1 cursor-help border border-emerald-200/50 shadow-sm"
+                                                        className="md:hidden w-1.5 h-1.5 rounded-full bg-emerald-500 mx-auto"
+                                                        title={suggestion.reason}
+                                                    />
+                                                )}
+                                                {suggestion && (
+                                                    <div
+                                                        className="hidden md:block marquee-container marquee-fast text-[9px] md:text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg font-bold cursor-help border border-emerald-200/50 shadow-sm"
                                                         title={suggestion.reason}
                                                     >
                                                         <div className="marquee-content flex items-center gap-1">
@@ -207,8 +220,12 @@ export default function CalendarPage() {
                                                         </div>
                                                     </div>
                                                 )}
+
                                                 {isVacationWeekend && (
-                                                    <div className="marquee-container marquee-fast text-[9px] text-emerald-600 font-medium flex items-center gap-1">
+                                                    <div className="md:hidden w-1.5 h-1.5 rounded-full bg-emerald-300 mx-auto" />
+                                                )}
+                                                {isVacationWeekend && (
+                                                    <div className="hidden md:flex marquee-container marquee-fast text-[9px] text-emerald-600 font-medium items-center gap-1">
                                                         <div className="marquee-content flex items-center gap-1">
                                                             <Sun className="h-3 w-3 shrink-0" />
                                                             Long Weekend
@@ -219,6 +236,22 @@ export default function CalendarPage() {
                                         </div>
                                     );
                                 })}
+                            </div>
+
+                            {/* Legend */}
+                            <div className="mt-6 flex flex-wrap justify-center gap-4 md:gap-8 px-2">
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-2 h-2 rounded-full bg-rose-500" />
+                                    <span className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Holiday</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                    <span className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Take Leave</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-300" />
+                                    <span className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Long Weekend</span>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
