@@ -142,11 +142,11 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
                                             </div>
 
                                             <div className="flex items-center gap-2 pt-2">
-                                                <a href={res.url} target="_blank" rel="noreferrer" className="w-full">
-                                                    <Button size="sm" variant="outline" className="w-full gap-2 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300" asChild>
+                                                <Button size="sm" variant="outline" className="w-full gap-2 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300" asChild>
+                                                    <a href={res.url} target="_blank" rel="noreferrer">
                                                         <Download className="h-4 w-4" /> Download
-                                                    </Button>
-                                                </a>
+                                                    </a>
+                                                </Button>
                                             </div>
                                         </CardContent>
                                     </Card>
