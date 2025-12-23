@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePreferencesStore } from '@/lib/store';
-import { Onboarding } from '@/components/features/Onboarding';
 import { useSession } from 'next-auth/react';
 
 export default function Home() {
@@ -29,10 +28,8 @@ export default function Home() {
         router.push('/dashboard');
       }
     } else if (status === 'unauthenticated') {
-      // If user has verified onboarding but isn't logged in, send to login
-      if (hasOnboarded) {
-        router.push('/login');
-      }
+      // Always redirect to login if not authenticated
+      router.push('/login');
     }
   }, [status, session, hasOnboarded, mounted, router]);
 
@@ -40,10 +37,6 @@ export default function Home() {
     return <div className="flex h-screen items-center justify-center bg-background text-muted-foreground">Loading...</div>;
   }
 
-  // If unauthenticated AND hasn't onboarded, show Onboarding
-  if (status === 'unauthenticated' && !hasOnboarded) {
-    return <Onboarding />;
-  }
-
+  // Fallback - should have redirected already
   return <div className="flex h-screen items-center justify-center">Redirecting...</div>;
 }
