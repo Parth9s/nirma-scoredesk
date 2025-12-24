@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { usePreferencesStore } from '@/lib/store';
 import { useAdminStore } from '@/lib/admin-store';
-import { parseStudentEmail, calculateSemester } from '@/lib/student-utils';
+import { parseStudentEmail, calculateSemester, getEligibleSemesters } from '@/lib/student-utils';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Calendar, GraduationCap, ArrowRight, MousePointerClick } from 'lucide-react';
@@ -24,18 +24,25 @@ export function Dashboard() {
     }, []);
 
     // Automatic Branch/Sem Detection
+    // Automatic Branch/Sem Detection
     useEffect(() => {
         if (session?.user?.email) {
             const studentInfo = parseStudentEmail(session.user.email);
             if (studentInfo) {
                 const currentSem = calculateSemester(studentInfo.admissionYear);
+                const eligibleSems = getEligibleSemesters(studentInfo.admissionYear);
 
-                // Only update if different to avoid infinite loops/unnecessary updates
-                // Or force update if we want to ensure they are strictly on their branch
-                // Given requirement: "automatically redirect... present in their Nirma email ID"
-                // strict enforcement seems desired.
-                if (branch !== studentInfo.branch || semester !== currentSem) {
-                    console.log(`Auto-redirecting student to ${studentInfo.branch} Sem ${currentSem}`);
+                // 1. Strict Branch Enforcement
+                if (branch !== studentInfo.branch) {
+                    console.log(`Auto-redirecting student branch to ${studentInfo.branch}`);
+                    setPreferences(studentInfo.branch, currentSem);
+                    return;
+                }
+
+                // 2. Allow switching between eligible semesters (e.g., Sem 3 & 4)
+                // Only redirect if the current semester is NOT in the eligible list
+                if (!semester || !eligibleSems.includes(semester)) {
+                    console.log(`Auto-redirecting student sem to ${currentSem} (Current: ${semester} not in [${eligibleSems}])`);
                     setPreferences(studentInfo.branch, currentSem);
                 }
             }
