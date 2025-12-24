@@ -4,10 +4,11 @@ import { Stream } from 'stream';
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 
 // OAuth 2.0 Config (User provided Refresh Token)
-// TODO: Move REFRESH_TOKEN to .env
+// OAuth 2.0 Config
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REFRESH_TOKEN = '1//04AnYa0tTk3TcCgYIARAAGAQSNwF-L9Ir-CT7Dd8lzSi0K9uzSd_1imr8eCfa65KdU_zDP112JqdWnsmSqmCrWCCQICM_dxNLq50';
+// Prefer Env Var, fallback to hardcoded (which is likely expired)
+const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN || '1//04AnYa0tTk3TcCgYIARAAGAQSNwF-L9Ir-CT7Dd8lzSi0K9uzSd_1imr8eCfa65KdU_zDP112JqdWnsmSqmCrWCCQICM_dxNLq50';
 
 const auth = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
 auth.setCredentials({ refresh_token: REFRESH_TOKEN });

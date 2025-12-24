@@ -70,6 +70,11 @@ export function ContributeForm() {
             return;
         }
 
+        if (file.size > 4 * 1024 * 1024) {
+            toast({ title: 'File too large', description: 'Max file size is 4MB', variant: 'destructive' });
+            return;
+        }
+
         setUploading(true);
         const data = new FormData();
         data.append('file', file);
@@ -85,10 +90,11 @@ export function ContributeForm() {
                 setFormData(prev => ({ ...prev, link: result.url }));
                 toast({ title: 'Uploaded', description: 'File uploaded successfully' });
             } else {
-                throw new Error(result.error);
+                throw new Error(result.details || result.error || 'Upload failed');
             }
-        } catch (error) {
-            toast({ title: 'Error', description: 'File upload failed', variant: 'destructive' });
+        } catch (error: any) {
+            console.error("Upload Error:", error);
+            toast({ title: 'Error', description: error.message || 'File upload failed', variant: 'destructive' });
         } finally {
             setUploading(false);
         }

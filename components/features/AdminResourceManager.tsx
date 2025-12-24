@@ -130,6 +130,11 @@ export function AdminResourceManager() {
             return;
         }
 
+        if (file.size > 4 * 1024 * 1024) {
+            toast({ title: 'File too large', description: 'Max file size is 4MB', variant: 'destructive' });
+            return;
+        }
+
         setUploading(true);
         const formData = new FormData();
         formData.append('file', file);
@@ -146,10 +151,11 @@ export function AdminResourceManager() {
                 setNewRes(prev => ({ ...prev, url: data.url, driveId: data.driveId }));
                 toast({ title: 'Uploaded', description: 'File uploaded successfully' });
             } else {
-                throw new Error(data.error || 'Upload failed');
+                throw new Error(data.details || data.error || 'Upload failed');
             }
-        } catch (error) {
-            toast({ title: 'Error', description: 'File upload failed', variant: 'destructive' });
+        } catch (error: any) {
+            console.error("Upload Error:", error);
+            toast({ title: 'Upload Error', description: error.message || 'File upload failed', variant: 'destructive' });
         } finally {
             setUploading(false);
         }
