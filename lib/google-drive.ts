@@ -1,29 +1,45 @@
 import { google } from 'googleapis';
 import { Stream } from 'stream';
 
-const SCOPES = ['https://www.googleapis.com/auth/drive'];
+// Client Instance
+let driveInstance: any = null;
 
-// OAuth 2.0 Config (User provided Refresh Token)
-// OAuth 2.0 Config
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-// Prefer Env Var, fallback to hardcoded (which is likely expired)
-const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN || '1//04AnYa0tTk3TcCgYIARAAGAQSNwF-L9Ir-CT7Dd8lzSi0K9uzSd_1imr8eCfa65KdU_zDP112JqdWnsmSqmCrWCCQICM_dxNLq50';
+export async function getDriveClient() {
+    if (driveInstance) return driveInstance;
 
-const auth = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
-auth.setCredentials({ refresh_token: REFRESH_TOKEN });
+    const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+    const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+    // Prefer Env Var, fallback to hardcoded (which is likely expired)
+    const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN || '1//04AnYa0tTk3TcCgYIARAAGAQSNwF-L9Ir-CT7Dd8lzSi0K9uzSd_1imr8eCfa65KdU_zDP112JqdWnsmSqmCrWCCQICM_dxNLq50';
 
-console.log("DEBUG: Drive Auth Initialized (OAuth2)");
+    console.log("DEBUG Drive Auth:", {
+        hasClientId: !!CLIENT_ID,
+        clientIdStart: CLIENT_ID?.substring(0, 10),
+        hasClientSecret: !!CLIENT_SECRET,
+        hasRefreshToken: !!REFRESH_TOKEN,
+        refreshTokenStart: REFRESH_TOKEN?.substring(0, 5),
+        isHardcodedToken: REFRESH_TOKEN?.startsWith('1//04A') // Check if it's the old one
+    });
 
-const drive = google.drive({ version: 'v3', auth });
+    if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
+        throw new Error("Missing Google Drive credentials (ID, Secret, or Token)");
+    }
+
+    const auth = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
+    auth.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+    driveInstance = google.drive({ version: 'v3', auth });
+    return driveInstance;
+}
+
+// Helper to get drive internally
+async function getDrive() {
+    return await getDriveClient();
+}
 
 // Root Folder ID (from Env or Static fallback)
 const ROOT_FOLDER_ID = process.env.DRIVE_ROOT_FOLDER_ID || '1yV3ksY_hajXlL5WM3EBcu3_zZO8xv2Xd';
 console.log("DEBUG: Root Folder ID:", ROOT_FOLDER_ID);
-
-export async function getDriveClient() {
-    return drive;
-}
 
 /**
  * Upload a file to the "Pending" folder (or specified folder)
@@ -38,15 +54,9 @@ export async function uploadFileToDrive(
         throw new Error("ROOT_FOLDER_ID is not defined.");
     }
 
-    // Default to ROOT/Pending if no folder provided? 
-    // Actually, plan says default to "Pending".
-    // Let's assume the caller provides the target folder ID or we find "Pending" inside Root.
-
-    // For simplicity V1: Just upload to the target folder ID passed.
-    // If we need to find "Pending" dynamically, we can do that too.
-
     const targetFolderId = folderId || await getFolderId('Pending', ROOT_FOLDER_ID!);
 
+    const drive = await getDrive();
     const response = await drive.files.create({
         requestBody: {
             name: fileName,
@@ -66,6 +76,7 @@ export async function uploadFileToDrive(
  * Move a file from one folder to another
  */
 export async function moveFile(fileId: string, currentFolderId: string, targetFolderId: string) {
+    const drive = await getDrive();
     await drive.files.update({
         fileId,
         addParents: targetFolderId,
@@ -78,6 +89,7 @@ export async function moveFile(fileId: string, currentFolderId: string, targetFo
  * Make a file public (Reader for Anyone)
  */
 export async function setPublicPermission(fileId: string) {
+    const drive = await getDrive();
     await drive.permissions.create({
         fileId,
         requestBody: {
@@ -108,6 +120,7 @@ export async function ensureHierarchy(branchName: string, semester: number): Pro
  * Helper: Get Folder ID by name within a parent, create if not exists
  */
 async function getFolderId(name: string, parentId: string): Promise<string> {
+    const drive = await getDrive();
     // Search
     const query = `mimeType='application/vnd.google-apps.folder' and name='${name}' and '${parentId}' in parents and trashed=false`;
     const res = await drive.files.list({
@@ -143,6 +156,7 @@ export async function getPendingFolderId(): Promise<string> {
  */
 export async function deleteFile(fileId: string) {
     try {
+        const drive = await getDrive();
         await drive.files.delete({
             fileId,
         });
@@ -152,3 +166,4 @@ export async function deleteFile(fileId: string) {
         // Don't throw, just log. We don't want to break the app if Drive fails.
     }
 }
+

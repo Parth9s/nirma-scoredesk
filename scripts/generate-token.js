@@ -18,7 +18,7 @@ const oauth2Client = new google.auth.OAuth2(
     REDIRECT_URI
 );
 
-const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+const SCOPES = ['https://www.googleapis.com/auth/drive'];
 
 const rl = readline.createInterface({
     input: process.stdin,
