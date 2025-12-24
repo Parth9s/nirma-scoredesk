@@ -1,13 +1,13 @@
 export const BRANCH_MAPPING: Record<string, string> = {
-    'BCE': 'Computer Science Engineering',
-    'BCS': 'Computer Science Engineering',
+    'BCE': 'Computer Science & Engineering', // Fixed: Added &
+    'BCS': 'Computer Science & Engineering',
     'BEL': 'Electrical Engineering',
-    'BEC': 'Electronics & Communication Engineering',
+    'BEC': 'Electronics & Communication', // Fixed: Removed Engineering suffix to match DB
     'BME': 'Mechanical Engineering',
     'BCL': 'Civil Engineering',
     'BCH': 'Chemical Engineering',
-    'BEI': 'Electronics & Instrumentation Engineering',
-    'BAM': 'Artificial Intelligence & Machine Learning', // Confirmed guess, but can adjust if exact DB string differs
+    'BEI': 'Electronics and Instrumentation Engineering', // Fixed: "and" instead of "&"
+    'BAM': 'Artificial Intelligence & Machine Learning', // DB entry generally missing for this yet, keeping as potential target
 };
 
 export const ADMIN_EMAIL = 'parthsavaliya1111@gmail.com';
