@@ -43,7 +43,7 @@ model Semester {
 model Subject {
   id         String   @id @default(uuid())
   name       String
-  code       String   @unique // e.g., "2CS401"
+  code       String   // e.g., "2CS401" (Not unique globally, as same subject exists across branches)
   credits    Float
   semesterId String
   semester   Semester @relation(fields: [semesterId], references: [id])
@@ -55,6 +55,8 @@ model Subject {
   
   // Custom Policy Overrides (optional, if null use defaults)
   attendanceThreshold Float @default(85.0) 
+
+  @@unique([code, semesterId]) // Ensure code is unique per semester (prevents duplicates in same class), but allows same code in other semesters/branches
 }
 
 // Evaluation & Grading

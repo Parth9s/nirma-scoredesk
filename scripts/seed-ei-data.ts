@@ -96,11 +96,16 @@ async function main() {
             // Assuming codes are unique.
 
             await prisma.subject.upsert({
-                where: { code: sub.code },
+                where: {
+                    code_semesterId: {
+                        code: sub.code,
+                        semesterId: semester.id
+                    }
+                },
                 update: {
                     name: sub.name,
                     credits: sub.credits,
-                    semesterId: semester.id, // Ensure it's linked to this semester/branch if we update
+                    // semesterId is part of unique key, unlikely to change, but good to keep consistency
                 },
                 create: {
                     name: sub.name,

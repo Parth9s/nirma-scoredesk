@@ -94,11 +94,15 @@ async function main() {
         // 3. Upsert Subjects
         for (const sub of subjects) {
             await prisma.subject.upsert({
-                where: { code: sub.code },
+                where: {
+                    code_semesterId: {
+                        code: sub.code,
+                        semesterId: semester.id
+                    }
+                },
                 update: {
                     name: sub.name,
                     credits: sub.credits,
-                    semesterId: semester.id,
                 },
                 create: {
                     name: sub.name,
