@@ -7,7 +7,7 @@ async function fetchSubjects() {
 
         const targetBranch = 'Electronics and Instrumentation Engineering';
 
-        const relevantSubjects = data.filter((s: any) =>
+        const relevantSubjects = (data as any[]).filter((s: any) =>
             s.semester?.branch?.name === targetBranch
         );
 
