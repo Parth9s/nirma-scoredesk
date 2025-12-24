@@ -28,8 +28,12 @@ export function Onboarding() {
 
     // Check Student Status
     useEffect(() => {
+        console.log("Session Data:", session); // DEBUG: Check if session is loaded
         if (session?.user?.email) {
+            console.log("User Email:", session.user.email); // DEBUG: Check email format
             const studentInfo = parseStudentEmail(session.user.email);
+            console.log("Parsed Student Info:", studentInfo); // DEBUG: Check parsing result
+
             if (studentInfo) {
                 // Lock Branch
                 setSelectedBranch(studentInfo.branch);
@@ -43,7 +47,11 @@ export function Onboarding() {
                 if (!eligibleSems.includes(selectedSem)) {
                     setSelectedSem(eligibleSems[0]);
                 }
+            } else {
+                console.warn("Student Info parsing failed for email:", session.user.email);
             }
+        } else if (session) {
+            console.warn("Session exists but no email:", session);
         }
     }, [session, selectedSem]);
 
