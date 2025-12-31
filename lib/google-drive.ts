@@ -10,7 +10,7 @@ export async function getDriveClient() {
     const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
     // Prefer Env Var, fallback to hardcoded (which is likely expired)
-    const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN || '1//04AnYa0tTk3TcCgYIARAAGAQSNwF-L9Ir-CT7Dd8lzSi0K9uzSd_1imr8eCfa65KdU_zDP112JqdWnsmSqmCrWCCQICM_dxNLq50';
+    const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 
     console.log("DEBUG Drive Auth:", {
         hasClientId: !!CLIENT_ID,
