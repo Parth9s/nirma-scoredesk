@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { FileText, Trash2, Plus, ExternalLink, Loader2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 // Types
 type ResourceType = 'NOTE' | 'PYQ';
@@ -61,6 +62,7 @@ export function AdminResourceManager() {
     // Form State
     const [isAdding, setIsAdding] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [progress, setProgress] = useState(0);
     const [newRes, setNewRes] = useState<{
         title: string;
         type: ResourceType;
@@ -121,6 +123,57 @@ export function AdminResourceManager() {
         } catch (e) { console.error(e); }
     };
 
+
+    const uploadLargeFile = async (file: File, onProgress: (percent: number) => void): Promise<{ url: string, driveId: string }> => {
+        // 1. Get Resumable URI
+        const sessionRes = await fetch('/api/upload/session', {
+            method: 'POST',
+            body: JSON.stringify({ filename: file.name, type: file.type, size: file.size })
+        });
+        if (!sessionRes.ok) throw new Error('Failed to start upload session');
+        const { uploadUri } = await sessionRes.json();
+
+        // 2. Chunk Upload
+        // Vercel limit is 4.5MB. We use 2MB to be safe and maximize speed.
+        const CHUNK_SIZE = 2 * 1024 * 1024;
+        const totalSize = file.size;
+        let offset = 0;
+
+        while (offset < totalSize) {
+            const chunk = file.slice(offset, offset + CHUNK_SIZE);
+            const end = Math.min(offset + CHUNK_SIZE, totalSize);
+
+            // Upload Chunk
+            const res = await fetch(`/api/upload/chunk?uploadUri=${encodeURIComponent(uploadUri)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Range': `bytes ${offset}-${end - 1}/${totalSize}`
+                },
+                body: chunk
+            });
+
+            if (res.status === 200) {
+                const data = await res.json();
+                if (data.status === 'complete') {
+                    onProgress(100);
+                    // Fallback if webViewLink is missing (common with some Drive API responses)
+                    const driveId = data.file.id;
+                    const url = data.file.webViewLink || `https://drive.google.com/file/d/${driveId}/view`;
+                    return { url, driveId };
+                }
+            } else if (res.status !== 308) {
+                // 308 is fine (Resume Incomplete), anything else is error
+                throw new Error(`Upload failed at byte ${offset}`);
+            }
+
+            offset += CHUNK_SIZE;
+            const percent = Math.round((offset / totalSize) * 100);
+            onProgress(Math.min(percent, 99));
+        }
+
+        throw new Error('Upload finished but no file returned');
+    };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -138,34 +191,44 @@ export function AdminResourceManager() {
             return;
         }
 
-        if (file.size > 50 * 1024 * 1024) {
-            toast({ title: 'File too large', description: 'Max file size is 50MB', variant: 'destructive' });
+        // Limit handled by Google Drive support (5TB), but let's say 1GB
+        if (file.size > 1024 * 1024 * 1024) {
+            toast({ title: 'File too large', description: 'Max size is 1GB', variant: 'destructive' });
             return;
         }
 
         setUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
+        setProgress(0);
 
         try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-
-            if (res.ok && data.url) {
-                // Save both URL and Drive ID
-                setNewRes(prev => ({ ...prev, url: data.url, driveId: data.driveId }));
-                toast({ title: 'Uploaded', description: 'File uploaded successfully' });
+            let result;
+            // Hybrid Strategy: 
+            // < 4MB: Use standard Upload (Simple, Fast, 1 Request)
+            // > 4MB: Use Chunked Upload (Reliable, Resumable, bypasses limits)
+            if (file.size < 4 * 1024 * 1024) {
+                const formData = new FormData();
+                formData.append('file', file);
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.details || data.error || 'Upload failed');
+                result = { url: data.url, driveId: data.driveId };
+                setProgress(100);
             } else {
-                throw new Error(data.details || data.error || 'Upload failed');
+                result = await uploadLargeFile(file, setProgress);
             }
+
+            setNewRes(prev => ({ ...prev, url: result.url, driveId: result.driveId }));
+            toast({ title: 'Uploaded', description: 'File uploaded successfully' });
         } catch (error: any) {
             console.error("Upload Error:", error);
             toast({ title: 'Upload Error', description: error.message || 'File upload failed', variant: 'destructive' });
+            setProgress(0);
         } finally {
             setUploading(false);
+            setTimeout(() => setProgress(0), 1000);
         }
     };
 
@@ -476,6 +539,12 @@ export function AdminResourceManager() {
                                             </div>
                                         </div>
                                         <p className="text-[10px] text-gray-500">Paste a link OR upload a PDF file.</p>
+                                        {uploading && (
+                                            <div className="space-y-1 mt-2">
+                                                <Progress value={progress} className="h-2" />
+                                                <p className="text-[10px] text-gray-500 text-right">{progress}% Uploaded</p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {newRes.type === 'PYQ' && (

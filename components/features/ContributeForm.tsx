@@ -8,6 +8,7 @@ import { UploadCloud, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePreferencesStore } from '@/lib/store';
 import { useSession } from 'next-auth/react';
+import { Progress } from '@/components/ui/progress';
 import { BRANCHES } from '@/lib/constants';
 
 interface Subject {
@@ -30,6 +31,7 @@ export function ContributeForm() {
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     const { branch: storeBranch, semester: storeSemester } = usePreferencesStore();
 
@@ -80,6 +82,55 @@ export function ContributeForm() {
         s => s.semester.branch.name === branch && s.semester.number === Number(semester)
     );
 
+    const uploadLargeFile = async (file: File, onProgress: (percent: number) => void): Promise<{ url: string, driveId: string }> => {
+        // 1. Get Resumable URI
+        const sessionRes = await fetch('/api/upload/session', {
+            method: 'POST',
+            body: JSON.stringify({ filename: file.name, type: file.type, size: file.size })
+        });
+        if (!sessionRes.ok) throw new Error('Failed to start upload session');
+        const { uploadUri } = await sessionRes.json();
+
+        // 2. Chunk Upload
+        const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB for safety
+        const totalSize = file.size;
+        let offset = 0;
+
+        while (offset < totalSize) {
+            const chunk = file.slice(offset, offset + CHUNK_SIZE);
+            const end = Math.min(offset + CHUNK_SIZE, totalSize);
+
+            // Upload Chunk
+            const res = await fetch(`/api/upload/chunk?uploadUri=${encodeURIComponent(uploadUri)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Range': `bytes ${offset}-${end - 1}/${totalSize}`
+                },
+                body: chunk
+            });
+
+            if (res.status === 200) {
+                const data = await res.json();
+                if (data.status === 'complete') {
+                    onProgress(100);
+                    // Fallback if webViewLink is missing
+                    const driveId = data.file.id;
+                    const url = data.file.webViewLink || `https://drive.google.com/file/d/${driveId}/view`;
+                    return { url, driveId };
+                }
+            } else if (res.status !== 308) {
+                // 308 is fine (Resume Incomplete), anything else is error
+                throw new Error(`Upload failed at byte ${offset}`);
+            }
+
+            offset += CHUNK_SIZE;
+            const percent = Math.round((offset / totalSize) * 100);
+            onProgress(Math.min(percent, 99));
+        }
+
+        throw new Error('Upload finished but no file returned');
+    };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -97,33 +148,45 @@ export function ContributeForm() {
             return;
         }
 
-        if (file.size > 50 * 1024 * 1024) {
-            toast({ title: 'File too large', description: 'Max file size is 50MB', variant: 'destructive' });
+        if (file.size > 1024 * 1024 * 1024) {
+            toast({ title: 'File too large', description: 'Max size is 1GB', variant: 'destructive' });
             return;
         }
 
         setUploading(true);
-        const data = new FormData();
-        data.append('file', file);
-
+        setProgress(0);
         try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: data
-            });
-            const result = await res.json();
-
-            if (res.ok && result.url) {
-                setFormData(prev => ({ ...prev, link: result.url }));
-                toast({ title: 'Uploaded', description: 'File uploaded successfully' });
+            let result;
+            if (file.size < 4 * 1024 * 1024) {
+                // Standard Upload
+                const formData = new FormData();
+                formData.append('file', file);
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.details || data.error || 'Upload failed');
+                result = { url: data.url, driveId: data.driveId };
+                setProgress(100);
             } else {
-                throw new Error(result.details || result.error || 'Upload failed');
+                // Chunked Upload
+                result = await uploadLargeFile(file, setProgress);
             }
+
+            // ContributeForm stores link, not ID yet (though API supports it). 
+            // Ideally we pass driveId to API too, but let's stick to link for now or update robustly.
+            // Actually API supports driveId, so let's try to pass it if possible? 
+            // The form state has no driveId field currently. Let's add it or just use link.
+            setFormData(prev => ({ ...prev, link: result.url }));
+            toast({ title: 'Uploaded', description: 'File uploaded successfully' });
         } catch (error: any) {
             console.error("Upload Error:", error);
             toast({ title: 'Error', description: error.message || 'File upload failed', variant: 'destructive' });
+            setProgress(0);
         } finally {
             setUploading(false);
+            setTimeout(() => setProgress(0), 1000);
         }
     };
 
@@ -310,6 +373,12 @@ export function ContributeForm() {
                                     </div>
                                 </div>
                                 <p className="text-[10px] text-gray-500">Paste a link OR upload a PDF file.</p>
+                                {uploading && (
+                                    <div className="space-y-1 mt-2">
+                                        <Progress value={progress} className="h-2" />
+                                        <p className="text-[10px] text-gray-500 text-right">{progress}% Uploaded</p>
+                                    </div>
+                                )}
                             </div>
 
                             <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white" disabled={loading || uploading}>

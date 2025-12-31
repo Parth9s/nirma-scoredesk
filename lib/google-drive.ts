@@ -75,14 +75,36 @@ export async function uploadFileToDrive(
 /**
  * Move a file from one folder to another
  */
-export async function moveFile(fileId: string, currentFolderId: string, targetFolderId: string) {
+export async function moveFile(fileId: string, ignoredPendingId: string, targetFolderId: string) {
     const drive = await getDrive();
-    await drive.files.update({
+
+    // 1. Get current parents
+    const file = await drive.files.get({
         fileId,
-        addParents: targetFolderId,
-        removeParents: currentFolderId,
-        fields: 'id, parents',
+        fields: 'parents'
     });
+
+    const currentParents = file.data.parents || [];
+    const previousParents = currentParents.join(',');
+
+    // 2. Update parents (Move)
+    if (previousParents) {
+        await drive.files.update({
+            fileId,
+            addParents: targetFolderId,
+            removeParents: previousParents,
+            fields: 'id, parents',
+        });
+    } else {
+        // If no parents (orphan?), just add the new one
+        await drive.files.update({
+            fileId,
+            addParents: targetFolderId,
+            fields: 'id, parents',
+        });
+    }
+
+    console.log(`[Drive] Moved file ${fileId} from [${previousParents}] to [${targetFolderId}]`);
 }
 
 /**
@@ -163,7 +185,48 @@ export async function deleteFile(fileId: string) {
         console.log(`[Drive] Deleted file: ${fileId}`);
     } catch (error) {
         console.error(`[Drive] Failed to delete file ${fileId}:`, error);
-        // Don't throw, just log. We don't want to break the app if Drive fails.
     }
 }
+/**
+ * Initiate a Resumable Upload Session
+ * Returns the Upload URI that chunks should be sent to.
+ */
+export async function getResumableUploadUri(
+    fileName: string,
+    mimeType: string,
+    folderId?: string
+): Promise<string> {
+    const drive = await getDrive();
+    const targetFolderId = folderId || await getPendingFolderId();
+
+    const token = await (drive.context._options.auth as any).getAccessToken();
+
+    const metadata = {
+        name: fileName,
+        parents: [targetFolderId],
+        mimeType: mimeType
+    };
+
+    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token.token}`,
+            'Content-Type': 'application/json',
+            'X-Upload-Content-Type': mimeType
+        },
+        body: JSON.stringify(metadata)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to initiate upload session: ${response.statusText}`);
+    }
+
+    const location = response.headers.get('Location');
+    if (!location) {
+        throw new Error("No upload location returned from Google Drive");
+    }
+
+    return location;
+}
+
 

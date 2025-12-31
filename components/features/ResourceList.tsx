@@ -116,7 +116,9 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
                                 {subjectName}
                             </h3>
                             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {groupedResources[subjectName].map(res => (
+                                {groupedResources[subjectName].sort((a, b) => {
+                                    return a.title.localeCompare(b.title, undefined, { numeric: true, sensitivity: 'base' });
+                                }).map(res => (
                                     <Card key={res.id} className="hover:shadow-md transition-shadow group h-full">
                                         <CardContent className="p-4 flex flex-col justify-between h-full gap-4">
                                             <div className="flex items-start gap-4">
