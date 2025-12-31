@@ -51,15 +51,26 @@ async function main() {
     console.log(`Checking Branch: ${BRANCH_NAME}`);
 
     // 1. Upsert Branch
-    const branch = await prisma.branch.upsert({
-        where: { name: BRANCH_NAME },
-        update: {},
-        create: {
-            name: BRANCH_NAME,
-            slug: BRANCH_SLUG,
-        },
+    let branch = await prisma.branch.findFirst({
+        where: {
+            OR: [
+                { name: BRANCH_NAME },
+                { slug: BRANCH_SLUG }
+            ]
+        }
     });
-    console.log(`Verified Branch: ${branch.name} (${branch.id})`);
+
+    if (!branch) {
+        branch = await prisma.branch.create({
+            data: {
+                name: BRANCH_NAME,
+                slug: BRANCH_SLUG,
+            }
+        });
+        console.log(`Created Branch: ${branch.name}`);
+    } else {
+        console.log(`Verified Branch: ${branch.name} (${branch.id})`);
+    }
 
     // 2. Iterate Semesters
     for (const [semNumStr, subjects] of Object.entries(subjectsData)) {

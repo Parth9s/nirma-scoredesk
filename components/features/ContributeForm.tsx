@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { UploadCloud, Upload, Loader2, FileText } from 'lucide-react';
+import { UploadCloud, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePreferencesStore } from '@/lib/store';
+import { useSession } from 'next-auth/react';
+import { BRANCHES } from '@/lib/constants';
 
 interface Subject {
     id: string;
@@ -19,15 +21,25 @@ interface Subject {
     }
 }
 
-import { BRANCHES } from '@/lib/constants';
-
 export function ContributeForm() {
     const { toast } = useToast();
+    const { data: session } = useSession();
+    // @ts-ignore
+    const hasGlobalAccess = session?.user?.hasGlobalAccess || session?.user?.role === 'ADMIN';
+
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
 
-    const { branch, semester } = usePreferencesStore();
+    const { branch: storeBranch, semester: storeSemester } = usePreferencesStore();
+
+    // Local state for Global Access overrides
+    const [selectedBranch, setSelectedBranch] = useState<string>('');
+    const [selectedSemester, setSelectedSemester] = useState<string>('');
+
+    // Determine effective Branch/Sem
+    const branch = hasGlobalAccess ? (selectedBranch || storeBranch) : storeBranch;
+    const semester = hasGlobalAccess ? (selectedSemester ? parseInt(selectedSemester) : storeSemester) : storeSemester;
 
     // Fetch all subjects, then filter locally
     const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
@@ -40,6 +52,13 @@ export function ContributeForm() {
         link: '',
         author: ''
     });
+
+    useEffect(() => {
+        if (hasGlobalAccess && storeBranch) {
+            if (!selectedBranch) setSelectedBranch(storeBranch);
+            if (!selectedSemester && storeSemester) setSelectedSemester(storeSemester.toString());
+        }
+    }, [hasGlobalAccess, storeBranch, storeSemester]);
 
     useEffect(() => {
         const fetchSubjects = async () => {
@@ -58,20 +77,28 @@ export function ContributeForm() {
 
     // Filter subjects based on selection
     const availableSubjects = allSubjects.filter(
-        s => s.semester.branch.name === branch && s.semester.number === semester
+        s => s.semester.branch.name === branch && s.semester.number === Number(semester)
     );
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        if (file.type !== 'application/pdf') {
-            toast({ title: 'Invalid File', description: 'Please upload a PDF', variant: 'destructive' });
+        const validTypes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.ms-powerpoint'
+        ];
+
+        if (!validTypes.includes(file.type)) {
+            toast({ title: 'Invalid File', description: 'Allowed: PDF, Word, PPT', variant: 'destructive' });
             return;
         }
 
-        if (file.size > 4 * 1024 * 1024) {
-            toast({ title: 'File too large', description: 'Max file size is 4MB', variant: 'destructive' });
+        if (file.size > 50 * 1024 * 1024) {
+            toast({ title: 'File too large', description: 'Max file size is 50MB', variant: 'destructive' });
             return;
         }
 
@@ -144,6 +171,11 @@ export function ContributeForm() {
                     Help your juniors and peers by sharing notes, papers, or important topics.
                     All submissions are reviewed by admins.
                 </p>
+                {hasGlobalAccess && (
+                    <div className="mt-2 p-2 bg-green-50 text-green-700 rounded-md text-sm inline-block border border-green-200">
+                        Global Contributor Access Enabled
+                    </div>
+                )}
             </div>
 
             <Card>
@@ -172,6 +204,44 @@ export function ContributeForm() {
                             </div>
 
                             {/* Branch/Sem/Subject Selection */}
+                            {hasGlobalAccess && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="branch">Branch</Label>
+                                        <select
+                                            id="branch"
+                                            className="w-full rounded-md border p-2 bg-white"
+                                            value={selectedBranch}
+                                            onChange={e => {
+                                                setSelectedBranch(e.target.value);
+                                                setFormData({ ...formData, subjectId: '' }); // Reset subject
+                                            }}
+                                        >
+                                            <option value="">Select Branch</option>
+                                            {BRANCHES.map(b => (
+                                                <option key={b} value={b}>{b}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="sem">Semester</Label>
+                                        <select
+                                            id="sem"
+                                            className="w-full rounded-md border p-2 bg-white"
+                                            value={selectedSemester}
+                                            onChange={e => {
+                                                setSelectedSemester(e.target.value);
+                                                setFormData({ ...formData, subjectId: '' }); // Reset subject
+                                            }}
+                                        >
+                                            {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
+                                                <option key={s} value={s}>{s}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="space-y-2">
                                 <Label htmlFor="subject">Subject *</Label>
                                 <select
@@ -229,7 +299,7 @@ export function ContributeForm() {
                                     <div className="relative">
                                         <input
                                             type="file"
-                                            accept=".pdf"
+                                            accept=".pdf,.doc,.docx,.ppt,.pptx"
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                             onChange={handleFileUpload}
                                             disabled={uploading}

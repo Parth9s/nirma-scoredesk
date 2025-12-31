@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { ensureHierarchy, moveFile, setPublicPermission, getPendingFolderId } from '@/lib/google-drive';
+import { ensureHierarchy, moveFile, setPublicPermission, getPendingFolderId, deleteFile } from '@/lib/google-drive';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -77,10 +77,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             const contribution = await prisma.contribution.findUnique({ where: { id } });
 
             if (contribution) {
-                // const data = JSON.parse(contribution.data);
-                // Note: We are currently NOT deleting the file from Drive on Reject. 
-                // It stays in Pending. Admin can manually clean up Pending folder occasionally.
-                // Automating delete requires 'delete' scope or 'trash' API which we can add later if requested.
+                const data = JSON.parse(contribution.data);
+
+                // Delete from Drive if driveId exists
+                if (data.driveId) {
+                    await deleteFile(data.driveId);
+                }
 
                 await prisma.contribution.delete({
                     where: { id }

@@ -125,13 +125,21 @@ export function AdminResourceManager() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        if (file.type !== 'application/pdf') {
-            toast({ title: 'Invalid File', description: 'Please upload a PDF', variant: 'destructive' });
+        const validTypes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.ms-powerpoint'
+        ];
+
+        if (!validTypes.includes(file.type)) {
+            toast({ title: 'Invalid File', description: 'Allowed: PDF, Word, PPT', variant: 'destructive' });
             return;
         }
 
-        if (file.size > 4 * 1024 * 1024) {
-            toast({ title: 'File too large', description: 'Max file size is 4MB', variant: 'destructive' });
+        if (file.size > 50 * 1024 * 1024) {
+            toast({ title: 'File too large', description: 'Max file size is 50MB', variant: 'destructive' });
             return;
         }
 
@@ -457,7 +465,7 @@ export function AdminResourceManager() {
                                             <div className="relative">
                                                 <input
                                                     type="file"
-                                                    accept=".pdf"
+                                                    accept=".pdf,.doc,.docx,.ppt,.pptx"
                                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                                     onChange={handleFileUpload}
                                                     disabled={uploading}

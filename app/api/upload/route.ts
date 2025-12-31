@@ -8,7 +8,11 @@ const ALLOWED_MIME_TYPES = [
     'application/pdf',
     'image/jpeg',
     'image/png',
-    'image/webp'
+    'image/webp',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/msword', // .doc
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    'application/vnd.ms-powerpoint' // .ppt
 ];
 
 export async function POST(request: Request) {
@@ -28,8 +32,9 @@ export async function POST(request: Request) {
 
         // 2. File Type Validation
         if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+            console.error(`Blocked upload of type: ${file.type}`);
             return NextResponse.json({
-                error: 'Invalid file type. Only PDF and Images are allowed.'
+                error: 'Invalid file type. Allowed: PDF, Images, Word, PPT.'
             }, { status: 400 });
         }
 

@@ -51,9 +51,9 @@ export default function AdminLayout({
                     <Link href="/admin/calendar" className={cn("flex items-center gap-3 px-3 py-2 rounded transition-colors", pathname.includes('calendar') ? "bg-slate-800 text-blue-400" : "hover:bg-slate-800")}>
                         <Calendar className="h-4 w-4" /> Calendar / Holidays
                     </Link>
-                    {/* <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-800 text-gray-400">
-                        <Users className="h-4 w-4" /> Users (Coming Soon)
-                    </Link> */}
+                    <Link href="/admin/access" className={cn("flex items-center gap-3 px-3 py-2 rounded transition-colors", pathname.includes('access') ? "bg-slate-800 text-blue-400" : "hover:bg-slate-800")}>
+                        <Users className="h-4 w-4" /> Access Management
+                    </Link>
                 </nav>
                 <div className="p-4 border-t border-slate-700">
                     <Button variant="ghost" className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-slate-800 px-2" onClick={handleLogout}>

@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthConfig } from "next-auth"
 import Google from "next-auth/providers/google"
+import { prisma } from "@/lib/prisma"
 
 import Credentials from "next-auth/providers/credentials"
 
@@ -38,31 +39,93 @@ export const config = {
         })
     ],
     callbacks: {
-        async signIn({ account, profile }) {
+        async signIn({ user, account, profile }) {
             if (account?.provider === "google") {
                 // Allow Admin Email
                 if (profile?.email === "parthsavaliya1111@gmail.com") return true;
+
                 // Allow Nirma Domain for students
-                return profile?.email?.endsWith("@nirmauni.ac.in") ?? false;
+                if (profile?.email?.endsWith("@nirmauni.ac.in")) {
+                    try {
+                        // Ensure user exists in DB
+                        // We use upsert to create if not exists, or update name/image if changed
+                        await prisma.user.upsert({
+                            where: { email: profile.email as string },
+                            update: {
+                                name: profile.name,
+                            },
+                            create: {
+                                email: profile.email as string,
+                                name: profile.name,
+                                password: "", // No password for Google users
+                                role: "STUDENT",
+                                hasGlobalAccess: false,
+                            }
+                        });
+                        return true;
+                    } catch (error) {
+                        console.error("Error creating user in DB:", error);
+                        // If DB fails, we technically shouldn't allow login if we rely on DB for access,
+                        // but if we want to allow basic access even if DB is down (fallback), we could return true.
+                        // However, for "hasGlobalAccess" feature, we need DB.
+                        // For now, let's allow it but log error.
+                        return true;
+                    }
+                }
+
+                return false;
             }
             return true;
         },
-        async jwt({ token, user, profile }) {
+        async jwt({ token, user, profile, trigger, session }) {
             // 1. Credentials Login (User object is present)
             if (user) {
                 if (user.email === "parthsavaliya1111@gmail.com") {
                     token.role = "ADMIN";
+                    token.hasGlobalAccess = true; // Admin has global access
                 }
             }
 
-            // 2. Google Login (Profile object is present)
+            // 2. Google Login (Profile object is present on first signin)
             if (profile) {
                 if (profile.email === "parthsavaliya1111@gmail.com") {
                     token.role = "ADMIN";
+                    token.hasGlobalAccess = true;
                 } else if (profile.email?.endsWith("@nirmauni.ac.in")) {
                     token.role = "STUDENT";
+                    // Fetch hasGlobalAccess from DB for students
+                    try {
+                        const dbUser = await prisma.user.findUnique({
+                            where: { email: profile.email as string }
+                        });
+                        token.hasGlobalAccess = dbUser?.hasGlobalAccess || false;
+                    } catch (e) {
+                        token.hasGlobalAccess = false;
+                    }
                 }
             }
+
+            // 3. Subsequent calls (token exists) - Refresh from DB if needed?
+            // To be efficient, we might rely on the token, but if we change access in Admin panel, 
+            // the user needs to re-login or we need to fetch on every jwt call.
+            // Let's fetch on every call for safety/immediacy since it's a security feature.
+            if (token.email) {
+                // Ensure we don't overwrite if it's admin hardcoded
+                if (token.email !== "parthsavaliya1111@gmail.com") {
+                    try {
+                        const dbUser = await prisma.user.findUnique({
+                            where: { email: token.email }
+                        });
+                        if (dbUser) {
+                            token.hasGlobalAccess = dbUser.hasGlobalAccess;
+                            token.role = dbUser.role; // Sync role too
+                        }
+                    } catch (e) {
+                        // DB down, keep existing token values
+                    }
+                }
+            }
+
             return token;
         },
         async session({ session, token }) {
@@ -70,6 +133,8 @@ export const config = {
             if (session.user && token.role) {
                 // @ts-ignore
                 session.user.role = token.role;
+                // @ts-ignore
+                session.user.hasGlobalAccess = token.hasGlobalAccess;
             }
             return session;
         },
