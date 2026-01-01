@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 };
 
 import { GoogleAdSense } from "@/components/GoogleAdSense";
-
+import { AnalyticsProvider } from "@/components/providers/AnalyticsProvider";
 import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({
@@ -76,9 +76,11 @@ export default function RootLayout({
         {/* Global Background Grid Only */}
         <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
         <SessionProvider>
-          <GoogleAdSense />
-          {children}
-          <SpeedInsights />
+          <AnalyticsProvider>
+            <GoogleAdSense />
+            {children}
+            <SpeedInsights />
+          </AnalyticsProvider>
         </SessionProvider>
       </body>
     </html>

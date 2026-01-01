@@ -60,8 +60,21 @@ export const config = {
                                 password: "", // No password for Google users
                                 role: "STUDENT",
                                 hasGlobalAccess: false,
+                                lastActive: new Date()
                             }
                         });
+
+                        // Log Login Activity
+                        const user = await prisma.user.findUnique({ where: { email: profile.email as string } });
+                        if (user) {
+                            await prisma.activityLog.create({
+                                data: {
+                                    userId: user.id,
+                                    action: 'LOGIN',
+                                    metadata: JSON.stringify({ provider: 'google', ip: 'unknown' }) // NextAuth doesn't give IP easily here
+                                }
+                            });
+                        }
                         return true;
                     } catch (error) {
                         console.error("Error creating user in DB:", error);

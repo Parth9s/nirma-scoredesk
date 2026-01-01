@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Users, BookOpen, Settings, LogOut, CheckSquare, FileText, Calendar } from 'lucide-react';
+import { Users, BookOpen, Settings, LogOut, CheckSquare, FileText, Calendar, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function AdminLayout({
@@ -44,6 +44,9 @@ export default function AdminLayout({
 
                     <Link href="/admin/subjects" className={cn("flex items-center gap-3 px-3 py-2 rounded transition-colors", pathname.includes('subjects') ? "bg-slate-800 text-blue-400" : "hover:bg-slate-800")}>
                         <BookOpen className="h-4 w-4" /> Subjects & Policies
+                    </Link>
+                    <Link href="/admin/insights" className={cn("flex items-center gap-3 px-3 py-2 rounded transition-colors", pathname.includes('insights') ? "bg-slate-800 text-blue-400" : "hover:bg-slate-800")}>
+                        <Activity className="h-4 w-4" /> Insights (Users)
                     </Link>
                     <Link href="/admin/resources" className={cn("flex items-center gap-3 px-3 py-2 rounded transition-colors", pathname.includes('resources') ? "bg-slate-800 text-blue-400" : "hover:bg-slate-800")}>
                         <FileText className="h-4 w-4" /> Resources / Notes
