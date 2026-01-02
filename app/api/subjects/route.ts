@@ -81,7 +81,8 @@ export async function POST(request: Request) {
                 code,
                 credits,
                 semesterId: semester.id,
-                attendanceThreshold: 75
+                attendanceThreshold: 75,
+                subjectGroup: body.subjectGroup || null // Add this line
             }
         });
 

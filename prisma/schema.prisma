@@ -58,6 +58,9 @@ model Subject {
   
   // Custom Policy Overrides (optional, if null use defaults)
   attendanceThreshold Float @default(85.0) 
+  
+  // Grouping (For FY Cycles)
+  subjectGroup String? // "1" (Cycle A), "2" (Cycle B), "COMMON"
 
   @@unique([code, semesterId]) // Ensure code is unique per semester (prevents duplicates in same class), but allows same code in other semesters/branches
 }

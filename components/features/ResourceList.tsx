@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, ExternalLink, Calendar, User, Loader2 } from 'lucide-react';
+import { FileText, Download, User, Loader2, Calendar } from 'lucide-react';
 import { usePreferencesStore } from '@/lib/store';
+import { CYCLE_A_SUBJECTS, CYCLE_B_SUBJECTS, COMMON_SUBJECTS } from '@/lib/constants';
 
 interface Resource {
     id: string;
@@ -21,12 +22,13 @@ interface Resource {
             branch: {
                 name: string;
             }
-        }
+        },
+        subjectGroup?: string | null;
     };
 }
 
 export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
-    const { branch, semester } = usePreferencesStore();
+    const { branch, semester, subjectGroup } = usePreferencesStore();
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterSubject, setFilterSubject] = useState('');
@@ -60,6 +62,31 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
         // 1. Must match user's branch and semester
         if (branch && r.subject.semester.branch.name !== branch) return false;
         if (semester && r.subject.semester.number !== semester) return false;
+
+        // 1.5 Filter by Group (Cycle) if applicable (FY Only)
+        if (semester && semester <= 2 && subjectGroup) {
+            const subjectName = r.subject.name;
+
+            // Helper for fuzzy match (Fallback if no explicit group)
+            const matches = (list: string[]) => list.some(s => subjectName.toLowerCase().includes(s.toLowerCase()));
+
+            if (subjectGroup === '1') {
+                // Cycle A + Common (Physics Cycle)
+                // 1. Explicit Check
+                if (r.subject.subjectGroup === '1' || r.subject.subjectGroup === 'COMMON') return true;
+                if (r.subject.subjectGroup === '2') return false; // Explicitly belongs to other group
+
+                // 2. Fallback Check (Name matching)
+                if (!matches(CYCLE_A_SUBJECTS) && !matches(COMMON_SUBJECTS)) return false;
+            } else if (subjectGroup === '2') {
+                // Cycle B + Common (Chemistry/IWP Cycle)
+
+                if (r.subject.subjectGroup === '2' || r.subject.subjectGroup === 'COMMON') return true;
+                if (r.subject.subjectGroup === '1') return false;
+
+                if (!matches(CYCLE_B_SUBJECTS) && !matches(COMMON_SUBJECTS)) return false;
+            }
+        }
 
         // 2. Must match search filter (if any)
         if (filterSubject && !r.subject.name.toLowerCase().includes(filterSubject.toLowerCase()) && !r.title.toLowerCase().includes(filterSubject.toLowerCase())) {

@@ -33,13 +33,14 @@ export async function PATCH(
     try {
         const { id } = await params;
         const body = await request.json();
+        console.log(`[PATCH] Updating subject ${id}`, body);
         const { name, code, credits, evaluationConfigs } = body;
 
         await prisma.$transaction(async (tx) => {
             // 1. Update basic info
             await tx.subject.update({
                 where: { id },
-                data: { name, code, credits }
+                data: { name, code, credits, subjectGroup: body.subjectGroup }
             });
 
             // 2. Update Evaluation Configs if provided
@@ -66,7 +67,8 @@ export async function PATCH(
 
         return NextResponse.json({ success: true });
     } catch (error: any) {
-        console.error('PATCH Error:', error);
-        return NextResponse.json({ error: 'Failed to update subject', details: error.message }, { status: 500 });
+        console.error('PATCH Error Full:', error);
+        const errorMessage = error?.message || 'Unknown server error';
+        return NextResponse.json({ error: 'Failed to update subject', details: errorMessage }, { status: 500 });
     }
 }

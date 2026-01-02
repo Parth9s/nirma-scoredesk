@@ -25,9 +25,10 @@ interface Subject {
         }
     };
     evaluationConfigs?: EvalComponent[];
+    subjectGroup?: string | null;
 }
 
-import { BRANCHES } from '@/lib/constants';
+import { BRANCHES, CYCLE_A_SUBJECTS, CYCLE_B_SUBJECTS, COMMON_SUBJECTS } from '@/lib/constants';
 
 export function AdminSubjectManager() {
     const { toast } = useToast();
@@ -48,7 +49,13 @@ export function AdminSubjectManager() {
     const fetchSubjects = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/subjects', { cache: 'no-store' });
+            // Encode params to handle special characters (like & in branch names)
+            const params = new URLSearchParams({
+                branch: selectedBranch,
+                semester: selectedSem.toString()
+            });
+
+            const res = await fetch(`/api/subjects?${params.toString()}`, { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
                 setSubjects(Array.isArray(data) ? data : []);
@@ -63,11 +70,10 @@ export function AdminSubjectManager() {
 
     useEffect(() => {
         fetchSubjects();
-    }, []);
+    }, [selectedBranch, selectedSem]); // Refetch when filters change
 
-    const filteredSubjects = subjects.filter(s =>
-        s.semester?.branch?.name === selectedBranch && s.semester?.number === selectedSem
-    );
+    // No need to filter client-side anymore
+    const filteredSubjects = subjects;
 
     const handleAddSubject = async () => {
         setLoading(true);
@@ -131,6 +137,7 @@ export function AdminSubjectManager() {
             name: sub.name,
             code: sub.code,
             credits: sub.credits,
+            subjectGroup: sub.subjectGroup || "", // Add this
             components: components
         });
     };
@@ -160,6 +167,7 @@ export function AdminSubjectManager() {
                 name: editForm.name,
                 code: editForm.code,
                 credits: editForm.credits,
+                subjectGroup: editForm.subjectGroup, // Add this
                 evaluationConfigs: editForm.components
             };
 
@@ -174,10 +182,13 @@ export function AdminSubjectManager() {
                 setEditingId(null);
                 fetchSubjects();
             } else {
-                throw new Error('Failed');
+                const errData = await res.json();
+                console.error("Save failed:", errData);
+                throw new Error(errData.details || 'Failed');
             }
-        } catch (error) {
-            toast({ title: 'Error', description: 'Update failed', variant: 'destructive' });
+        } catch (error: any) {
+            console.error("Save error:", error);
+            toast({ title: 'Error', description: `Update failed: ${error.message}`, variant: 'destructive' });
         }
     };
 
@@ -260,7 +271,25 @@ export function AdminSubjectManager() {
                                     </div>
                                 </div>
                             ) : (
-                                <CardTitle className="text-lg">{sub.name} <span className="text-sm font-normal text-gray-500">({sub.code}) - {sub.credits} Credits</span></CardTitle>
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    {sub.name}
+                                    <span className="text-sm font-normal text-gray-500">({sub.code}) - {sub.credits} Credits</span>
+
+                                    {selectedSem <= 2 && (
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${(sub.subjectGroup === '1' || (!sub.subjectGroup && CYCLE_A_SUBJECTS.some(s => sub.name.includes(s)))) ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                            (sub.subjectGroup === '2' || (!sub.subjectGroup && CYCLE_B_SUBJECTS.some(s => sub.name.includes(s)))) ? 'bg-green-50 text-green-600 border-green-200' :
+                                                (sub.subjectGroup === 'COMMON' || (!sub.subjectGroup && COMMON_SUBJECTS.some(s => sub.name.includes(s)))) ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                                                    'bg-gray-50 text-gray-500'
+                                            }`}>
+                                            {sub.subjectGroup === '1' ? 'Grp 1 (Phys)' :
+                                                sub.subjectGroup === '2' ? 'Grp 2 (Chem)' :
+                                                    sub.subjectGroup === 'COMMON' ? 'Common' :
+                                                        CYCLE_A_SUBJECTS.some(s => sub.name.includes(s)) ? 'Grp 1 (Phys)' :
+                                                            CYCLE_B_SUBJECTS.some(s => sub.name.includes(s)) ? 'Grp 2 (Chem)' :
+                                                                COMMON_SUBJECTS.some(s => sub.name.includes(s)) ? 'Common' : 'Unassigned'}
+                                        </span>
+                                    )}
+                                </CardTitle>
                             )}
 
                             <div className="flex gap-2 ml-4">
@@ -297,9 +326,24 @@ export function AdminSubjectManager() {
                                 <div className="flex justify-between items-center">
                                     <h4 className="font-semibold text-sm">Evaluation Policy</h4>
                                     {editingId === sub.id && (
-                                        <Button size="sm" variant="ghost" onClick={addComponent} className="text-slate-600 text-xs hover:text-slate-900">
-                                            + Add Component
-                                        </Button>
+                                        <div className="flex gap-2">
+                                            {/* Group Selection */}
+                                            {selectedSem <= 2 && (
+                                                <select
+                                                    className="border rounded px-2 py-1 text-xs"
+                                                    value={editForm.subjectGroup || ""}
+                                                    onChange={e => setEditForm({ ...editForm, subjectGroup: e.target.value || null })}
+                                                >
+                                                    <option value="">Auto-Detect</option>
+                                                    <option value="1">Group 1 (Phys)</option>
+                                                    <option value="2">Group 2 (Chem)</option>
+                                                    <option value="COMMON">Common</option>
+                                                </select>
+                                            )}
+                                            <Button size="sm" variant="ghost" onClick={addComponent} className="text-slate-600 text-xs hover:text-slate-900">
+                                                + Add Component
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
 

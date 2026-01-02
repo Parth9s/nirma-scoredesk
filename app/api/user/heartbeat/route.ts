@@ -10,14 +10,22 @@ export async function POST(request: Request) {
         }
 
         // Update lastActive timestamp
-        await prisma.user.update({
-            where: { email: session.user.email },
-            data: { lastActive: new Date() }
-        });
+        try {
+            await prisma.user.update({
+                where: { email: session.user.email },
+                data: { lastActive: new Date() }
+            });
+        } catch (error: any) {
+            // P2025: Record to update not found.
+            // This happens if the DB was reset but the browser has a stale session cookie.
+            // We can safely ignore this as the user isn't in the DB anyway.
+            if (error.code !== 'P2025') {
+                console.error("Heartbeat error:", error);
+            }
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Heartbeat error:", error);
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
 }

@@ -19,6 +19,7 @@ export function Onboarding() {
     // State
     const [selectedBranch, setSelectedBranch] = useState(BRANCHES[0]);
     const [selectedSem, setSelectedSem] = useState(1);
+    const [selectedGroup, setSelectedGroup] = useState<'1' | '2'>('1');
     const [allowedSemesters, setAllowedSemesters] = useState<number[]>([1, 2, 3, 4, 5, 6, 7, 8]);
     const [isBranchLocked, setIsBranchLocked] = useState(false);
 
@@ -57,7 +58,9 @@ export function Onboarding() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setPreferences(selectedBranch, selectedSem);
+        // If sem > 2, group is null
+        const groupToSave = selectedSem <= 2 ? selectedGroup : null;
+        setPreferences(selectedBranch, selectedSem, groupToSave);
         router.push('/dashboard');
     };
 
@@ -107,6 +110,24 @@ export function Onboarding() {
                                 ))}
                             </select>
                         </div>
+
+                        {selectedSem <= 2 && (
+                            <div className="space-y-2">
+                                <Label htmlFor="group">Subject Group (Cycle)</Label>
+                                <select
+                                    id="group"
+                                    className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-slate-500 focus:outline-none"
+                                    value={selectedGroup}
+                                    onChange={(e) => setSelectedGroup(e.target.value as '1' | '2')}
+                                >
+                                    <option value="1">Physics Cycle (Group 1 / Cycle A)</option>
+                                    <option value="2">Chemistry/IWP Cycle (Group 2 / Cycle B)</option>
+                                </select>
+                                <p className="text-xs text-gray-500">
+                                    Determines your subjects for First Year.
+                                </p>
+                            </div>
+                        )}
 
                         <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" type="submit">
                             Get Started
