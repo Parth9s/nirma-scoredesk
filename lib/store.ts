@@ -10,6 +10,19 @@ interface UserPreferences {
     hasOnboarded: boolean;
 }
 
+// Cache Store for API responses
+interface CacheState {
+    resourceCache: Record<string, any[]>;
+    setCache: (key: string, data: any[]) => void;
+    getCache: (key: string) => any[] | null;
+}
+
+export const useCacheStore = create<CacheState>((set, get) => ({
+    resourceCache: {},
+    setCache: (key, data) => set((state) => ({ resourceCache: { ...state.resourceCache, [key]: data } })),
+    getCache: (key) => get().resourceCache[key] || null,
+}));
+
 export const usePreferencesStore = create<UserPreferences>()(
     persist(
         (set) => ({

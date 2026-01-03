@@ -12,11 +12,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         const { id } = await params;
         const body = await request.json();
-        const { hasGlobalAccess } = body;
+        const { hasGlobalAccess, isBanned } = body;
+
+        const updateData: any = {};
+        if (typeof hasGlobalAccess === 'boolean') updateData.hasGlobalAccess = hasGlobalAccess;
+        if (typeof isBanned === 'boolean') updateData.isBanned = isBanned;
 
         const updatedUser = await prisma.user.update({
             where: { id },
-            data: { hasGlobalAccess }
+            data: updateData
         });
 
         return NextResponse.json(updatedUser);

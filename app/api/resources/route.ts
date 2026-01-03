@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const type = searchParams.get('type');
     const branchName = searchParams.get('branch');
     const semesterNumber = searchParams.get('semester');
+    const subjectGroup = searchParams.get('subjectGroup');
 
     const whereClause: any = {
         subjectId: subjectId || undefined,
@@ -23,6 +24,15 @@ export async function GET(request: Request) {
 
         if (branchName) {
             whereClause.subject.semester.branch = { name: branchName };
+        }
+
+        // Optimization: Filter out irrelevant groups early
+        if (subjectGroup) {
+            if (subjectGroup === '1') {
+                whereClause.subject.subjectGroup = { not: '2' };
+            } else if (subjectGroup === '2') {
+                whereClause.subject.subjectGroup = { not: '1' };
+            }
         }
     }
 

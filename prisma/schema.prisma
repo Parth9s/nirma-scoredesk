@@ -19,6 +19,7 @@ model User {
   name      String?
   role      String   @default("STUDENT") // ADMIN, STUDENT
   hasGlobalAccess Boolean @default(false)
+  isBanned        Boolean @default(false) // Blocks access if true
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   lastActive DateTime? // Track when the user was last seen online
@@ -41,6 +42,7 @@ model Semester {
   academicCalendarUrl String? // URL to PDF
   
   @@unique([branchId, number])
+  @@index([branchId])
 }
 
 model Subject {
@@ -53,6 +55,7 @@ model Subject {
 
   evaluationConfigs EvaluationConfig[]
   resources        Resource[]
+  assignments      PeerAssignment[]
   importantTopics  ImportantTopic[]
   schedules        SubjectSchedule[]
   
@@ -63,6 +66,8 @@ model Subject {
   subjectGroup String? // "1" (Cycle A), "2" (Cycle B), "COMMON"
 
   @@unique([code, semesterId]) // Ensure code is unique per semester (prevents duplicates in same class), but allows same code in other semesters/branches
+  @@index([semesterId])
+  @@index([subjectGroup])
 }
 
 // Evaluation & Grading
@@ -108,6 +113,9 @@ model Resource {
   author      String?
   uploadedAt  DateTime     @default(now())
   downloads   Int          @default(0)
+
+  @@index([subjectId])
+  @@index([type])
 }
 
 model ImportantTopic {
@@ -145,4 +153,39 @@ model ActivityLog {
   action    String   // LOGIN, PAGE_VIEW, LOGOUT, etc.
   metadata  String?  // JSON string for detail (e.g., ip, browser)
   createdAt DateTime @default(now())
+}
+
+model PeerAssignment {
+  id          String   @id @default(uuid())
+  title       String   // Topic of assignment
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  
+  facultyName String   // Name of faculty given assignment
+  studentName String   // Alias/Name of uploader
+  division    String?  // Optional division
+  
+  url         String   // File URL
+  
+  // Track individual downloads
+  downloads        PeerAssignmentDownload[]
+  // Keep simple counter for efficient sorting/display if needed, or compute it
+  downloadCount    Int      @default(0) 
+  
+  createdAt   DateTime @default(now())
+
+  @@index([subjectId])
+}
+
+model PeerAssignmentDownload {
+  id              String         @id @default(uuid())
+  assignmentId    String
+  assignment      PeerAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  
+  downloaderName  String
+  downloaderFaculty String
+  
+  downloadedAt    DateTime       @default(now())
+  
+  @@index([assignmentId])
 }

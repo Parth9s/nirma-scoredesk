@@ -5,9 +5,10 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { User, Search, ShieldCheck, RefreshCw } from 'lucide-react';
+import { User, Search, ShieldCheck, RefreshCw, Ban } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 interface UserData {
     id: string;
@@ -15,6 +16,7 @@ interface UserData {
     email: string;
     role: string;
     hasGlobalAccess: boolean;
+    isBanned: boolean;
     createdAt: string;
 }
 
@@ -91,24 +93,34 @@ export default function AccessManagementPage() {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
-    const handleToggleAccess = async (userId: string, currentStatus: boolean) => {
+    const handleToggleAccess = async (userId: string, currentStatus: boolean, type: 'access' | 'ban') => {
         setToggling(userId);
         try {
+            const body = type === 'access'
+                ? { hasGlobalAccess: !currentStatus }
+                : { isBanned: !currentStatus };
+
             const res = await fetch(`/api/admin/users/${userId}/access`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ hasGlobalAccess: !currentStatus })
+                body: JSON.stringify(body)
             });
 
             if (res.ok) {
                 const updatedUser = await res.json();
-                setUsers(prev => prev.map(u => u.id === userId ? { ...u, hasGlobalAccess: updatedUser.hasGlobalAccess } : u));
-                toast({ title: 'Success', description: `Access ${!currentStatus ? 'granted' : 'revoked'}.` });
+                setUsers(prev => prev.map(u => u.id === userId ? {
+                    ...u,
+                    hasGlobalAccess: updatedUser.hasGlobalAccess,
+                    isBanned: updatedUser.isBanned
+                } : u));
+
+                const action = type === 'access' ? 'Access' : 'Ban status';
+                toast({ title: 'Success', description: `${action} updated.` });
             } else {
-                throw new Error('Failed to update access');
+                throw new Error('Failed to update');
             }
         } catch (error) {
-            toast({ title: 'Error', description: 'Could not update user access.', variant: 'destructive' });
+            toast({ title: 'Error', description: 'Could not update user.', variant: 'destructive' });
         } finally {
             setToggling(null);
         }
@@ -220,7 +232,10 @@ export default function AccessManagementPage() {
                                                         <User className="h-4 w-4 text-slate-500" />
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium">{user.name || 'Unknown'}</div>
+                                                        <div className="font-medium flex items-center gap-2">
+                                                            {user.name || 'Unknown'}
+                                                            {user.isBanned && <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">BANNED</span>}
+                                                        </div>
                                                         <div className="text-xs text-muted-foreground">{user.email}</div>
                                                     </div>
                                                 </div>
@@ -232,7 +247,12 @@ export default function AccessManagementPage() {
                                                 </span>
                                             </td>
                                             <td className="p-4">
-                                                {user.hasGlobalAccess ? (
+                                                {user.isBanned ? (
+                                                    <span className="flex items-center text-red-600 gap-1 text-xs font-bold bg-red-50 px-2 py-1 rounded w-fit">
+                                                        <ShieldCheck className="h-3 w-3" />
+                                                        BANNED
+                                                    </span>
+                                                ) : user.hasGlobalAccess ? (
                                                     <span className="flex items-center text-green-600 gap-1 text-xs">
                                                         <ShieldCheck className="h-3 w-3" />
                                                         Global Contributor
@@ -242,14 +262,29 @@ export default function AccessManagementPage() {
                                                 )}
                                             </td>
                                             <td className="p-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <Label htmlFor={`access-${user.id}`} className="sr-only">Toggle Access</Label>
-                                                    <Switch
-                                                        id={`access-${user.id}`}
-                                                        checked={user.hasGlobalAccess}
-                                                        onCheckedChange={() => handleToggleAccess(user.id, user.hasGlobalAccess)}
-                                                        disabled={toggling === user.id || user.role === 'ADMIN'}
-                                                    />
+                                                <div className="flex items-center justify-end gap-3">
+                                                    <div className="flex items-center gap-2" title="Global Access">
+                                                        <Label htmlFor={`access-${user.id}`} className="sr-only">Toggle Access</Label>
+                                                        <Switch
+                                                            id={`access-${user.id}`}
+                                                            checked={user.hasGlobalAccess}
+                                                            onCheckedChange={() => handleToggleAccess(user.id, user.hasGlobalAccess, 'access')}
+                                                            disabled={toggling === user.id || user.role === 'ADMIN'}
+                                                        />
+                                                    </div>
+
+                                                    {user.role !== 'ADMIN' && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className={cn("h-8 w-8 p-0 hover:bg-red-50", user.isBanned ? "text-red-600 bg-red-50" : "text-gray-400 hover:text-red-500")}
+                                                            onClick={() => handleToggleAccess(user.id, user.isBanned, 'ban')}
+                                                            title={user.isBanned ? "Unban User" : "Ban User"}
+                                                            disabled={toggling === user.id}
+                                                        >
+                                                            <Ban className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

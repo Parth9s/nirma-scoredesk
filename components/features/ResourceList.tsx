@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, User, Loader2, Calendar } from 'lucide-react';
-import { usePreferencesStore } from '@/lib/store';
+import { SkeletonCard } from '@/components/ui/skeleton-card';
+import { usePreferencesStore, useCacheStore } from '@/lib/store';
 import { CYCLE_A_SUBJECTS, CYCLE_B_SUBJECTS, COMMON_SUBJECTS } from '@/lib/constants';
 
 interface Resource {
@@ -27,25 +28,47 @@ interface Resource {
     };
 }
 
+import { useSearchParams } from 'next/navigation';
+
 export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
     const { branch, semester, subjectGroup } = usePreferencesStore();
+    const { getCache, setCache } = useCacheStore();
+    const searchParams = useSearchParams();
+
+    // Generate cache key based on all filters
+    const cacheKey = `resources-${type}-${branch || 'all'}-${semester || 'all'}-${subjectGroup || 'none'}`;
+
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterSubject, setFilterSubject] = useState('');
+
+    // Initialize filter from URL param 'subject' if present
+    const [filterSubject, setFilterSubject] = useState(searchParams?.get('subject') || '');
 
     useEffect(() => {
         const fetchResources = async () => {
-            setLoading(true);
+            // 1. Try Cache First for Instant Load
+            const cachedData = getCache(cacheKey);
+            if (cachedData) {
+                setResources(cachedData);
+                setLoading(false); // Immediate display
+            } else {
+                setLoading(true); // Show skeleton only if no cache
+            }
+
             try {
                 // Fetch resources with specific filtering
                 let url = `/api/resources?type=${type}`;
                 if (branch) url += `&branch=${encodeURIComponent(branch)}`;
                 if (semester) url += `&semester=${semester}`;
+                if (subjectGroup) url += `&subjectGroup=${subjectGroup}`;  // Optimization
 
                 const res = await fetch(url);
                 if (res.ok) {
                     const data = await res.json();
+
+                    // Update state and cache
                     setResources(data);
+                    setCache(cacheKey, data);
                 }
             } catch (error) {
                 console.error('Failed to fetch resources', error);
@@ -55,7 +78,7 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
         };
 
         fetchResources();
-    }, [type, branch, semester]);
+    }, [type, branch, semester, subjectGroup, cacheKey, getCache, setCache]);
 
     // Filter by User Preferences (Branch/Sem) AND Local Search Input
     const filteredResources = resources.filter(r => {
@@ -106,9 +129,23 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
 
     const sortedSubjectNames = Object.keys(groupedResources).sort();
 
+    // Replace Spinner with Skeleton Grid
     if (loading) {
-        return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-slate-600" /></div>;
+        return (
+            <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2" />
+                        <div className="h-4 w-64 bg-gray-100 rounded animate-pulse" />
+                    </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
+                </div>
+            </div>
+        );
     }
+
 
     return (
         <div className="space-y-6">

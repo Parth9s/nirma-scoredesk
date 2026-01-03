@@ -24,6 +24,7 @@ const NAV_ITEMS = [
     { href: '/dashboard/sgpa', label: 'SGPA/CGPA', icon: GraduationCap },
     { href: '/dashboard/resources/notes', label: 'Notes', icon: FileText },
     { href: '/dashboard/resources/pyq', label: 'PYQ', icon: BookOpen },
+    { href: '/dashboard/assignments', label: 'Assignments', icon: BookOpen },
     { href: '/dashboard/contribute', label: 'Contribute', icon: Upload },
     { href: '#', label: 'AI Exam Predictor (Coming Soon)', icon: Sparkles, disabled: true },
 ];

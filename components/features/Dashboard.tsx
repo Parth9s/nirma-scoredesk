@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, Calendar, GraduationCap, ArrowRight, MousePointerClick } from 'lucide-react';
 import { AdBanner } from '@/components/ui/AdBanner';
 import { FeatureLinkCard } from './FeatureLinkCard';
+import { SubjectModal } from './SubjectModal';
 
 export function Dashboard() {
     const { data: session } = useSession();
@@ -63,8 +64,24 @@ export function Dashboard() {
 
     const calendarUrl = (branch && semester && calendarUrls[branch]?.[semester]) || null;
 
+    // State for Subject Command Center Modal
+    const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleSubjectClick = (subject: any) => {
+        setSelectedSubject(subject);
+        setIsModalOpen(true);
+    };
+
     return (
         <div className="min-h-screen">
+            {/* Subject Command Center Modal */}
+            <SubjectModal
+                subject={selectedSubject}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
+
             <header className="border-b sticky top-0 z-50 backdrop-blur-sm bg-white/50">
                 <div className="h-16 px-6 flex items-center justify-between">
                     <div className="flex-1" /> {/* Spacer to push content to right */}
@@ -124,6 +141,16 @@ export function Dashboard() {
                             iconColorClass="text-purple-600"
                             buttonText="View Notes"
                         />
+                        <FeatureLinkCard
+                            title="Peer Assignments"
+                            description="Share and copy assignments from batchmates."
+                            icon={BookOpen}
+                            href="/dashboard/assignments"
+                            borderColorClass="border-l-orange-500"
+                            iconBgClass="bg-orange-100"
+                            iconColorClass="text-orange-600"
+                            buttonText="Browse"
+                        />
                     </div>
                 </section>
 
@@ -137,15 +164,22 @@ export function Dashboard() {
                         {mySubjects.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {mySubjects.map(sub => (
-                                    <div key={sub.id} className="bg-white p-4 rounded-xl border transition-colors group relative">
+                                    <div
+                                        key={sub.id}
+                                        className="bg-white p-4 rounded-xl border transition-all group relative hover:shadow-md cursor-pointer hover:border-indigo-200 active:scale-[0.98]"
+                                        onClick={() => handleSubjectClick(sub)}
+                                    >
                                         <div className="flex justify-between items-start mb-2">
-                                            <h4 className="font-semibold text-gray-800 pr-6 leading-tight">{sub.name}</h4>
-                                            <span className="text-[10px] font-mono bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{sub.code}</span>
+                                            <h4 className="font-semibold text-gray-800 pr-6 leading-tight group-hover:text-indigo-700 transition-colors">{sub.name}</h4>
+                                            <span className="text-[10px] font-mono bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded group-hover:bg-indigo-50 group-hover:text-indigo-600">{sub.code}</span>
                                         </div>
                                         <div className="flex gap-2 text-xs text-gray-500 mb-3">
                                             <span>{sub.credits} Credits</span>
                                             <span>•</span>
                                             <span>{sub.components.length} Components</span>
+                                        </div>
+                                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <MousePointerClick className="h-4 w-4 text-indigo-400" />
                                         </div>
                                     </div>
                                 ))}

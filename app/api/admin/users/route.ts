@@ -21,7 +21,16 @@ export async function GET(request: Request) {
                 ]
             } : undefined,
             orderBy: { createdAt: 'desc' },
-            take: 20
+            take: 20,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                hasGlobalAccess: true,
+                isBanned: true,
+                createdAt: true
+            }
         });
 
         return NextResponse.json(users);

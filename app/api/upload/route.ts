@@ -12,7 +12,10 @@ const ALLOWED_MIME_TYPES = [
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
     'application/msword', // .doc
     'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
-    'application/vnd.ms-powerpoint' // .ppt
+    'application/vnd.ms-powerpoint', // .ppt
+    'application/zip',
+    'application/x-zip-compressed',
+    'multipart/x-zip'
 ];
 
 export async function POST(request: Request) {
