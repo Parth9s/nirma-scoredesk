@@ -16,19 +16,19 @@ export const metadata: Metadata = {
     default: "Stride | Academic Dashboard",
     template: "%s | Stride"
   },
-  description: "The ultimate academic companion for engineering students. Calculate SGPA/CGPA, track attendance, and access study resources.",
-  keywords: ["Stride", "ScoreDesk", "SGPA Calculator", "CGPA Calculator", "Attendance Tracker", "Engineering Notes", "PYQ"],
+  description: "Your complete academic command center. Track grades, attendance, and resources in one place.",
+  keywords: ["Stride", "Student Dashboard", "SGPA Calculator", "CGPA Calculator", "Attendance Tracker", "Engineering Notes", "PYQ"],
   authors: [{ name: "Parth Savaliya" }],
   creator: "Parth Savaliya",
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: "https://strideee.in",
-    title: "Stride - Student Dashboard",
-    description: "Track your academic progress, calculate grades, and access resources.",
+    title: "Stride | Academic Dashboard",
+    description: "Your complete academic command center. Track grades, attendance, and resources in one place.",
     siteName: "Stride",
     images: [{
-      url: "/icon.png", // Next.js will resolve this
+      url: "/icon.png",
       width: 512,
       height: 512,
       alt: "Stride Logo"
@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stride",
-    description: "Your academic dashboard.",
-    images: ["/icon.png"], // Same icon
+    title: "Stride | Academic Dashboard",
+    description: "Your complete academic command center. Track grades, attendance, and resources in one place.",
+    images: ["/icon.png"],
   },
   robots: {
     index: true,
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  manifest: '/manifest.json',
+  manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

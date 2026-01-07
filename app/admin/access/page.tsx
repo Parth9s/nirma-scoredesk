@@ -26,6 +26,7 @@ import { Plus } from 'lucide-react';
 export default function AccessManagementPage() {
     const { toast } = useToast();
     const [users, setUsers] = useState<UserData[]>([]);
+    const [totalUsers, setTotalUsers] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [toggling, setToggling] = useState<string | null>(null);
@@ -66,7 +67,6 @@ export default function AccessManagementPage() {
     };
 
     const fetchUsers = async () => {
-        // ... default fetchUsers implementation
         setLoading(true);
         try {
             const params = new URLSearchParams();
@@ -75,7 +75,8 @@ export default function AccessManagementPage() {
             const res = await fetch(`/api/admin/users?${params.toString()}`);
             if (res.ok) {
                 const data = await res.json();
-                setUsers(data);
+                setUsers(data.users);
+                setTotalUsers(data.total);
             } else {
                 throw new Error('Failed to fetch users');
             }
@@ -130,7 +131,12 @@ export default function AccessManagementPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Access Management</h2>
+                    <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                        Access Management
+                        <span className="text-sm font-normal bg-slate-100 px-3 py-1 rounded-full text-slate-600 border">
+                            Total: {totalUsers}
+                        </span>
+                    </h2>
                     <p className="text-muted-foreground">Grant global contribution access to trusted students.</p>
                 </div>
                 <div className="flex gap-2">
