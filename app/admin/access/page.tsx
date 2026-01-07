@@ -146,7 +146,7 @@ export default function AccessManagementPage() {
                             </DialogHeader>
                             <form onSubmit={handleCreateUser} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="email">Nirma Email ID</Label>
+                                    <Label htmlFor="email">University Email ID</Label>
                                     <div className="flex items-center">
                                         <Input
                                             id="email"

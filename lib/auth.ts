@@ -44,7 +44,7 @@ export const config = {
                 // Allow Admin Email
                 if (profile?.email === "parthsavaliya1111@gmail.com") return true;
 
-                // Allow Nirma Domain for students
+                // Allow University Domain for students
                 if (profile?.email?.endsWith("@nirmauni.ac.in")) {
                     try {
                         // Check if user exists and is banned BEFORE upserting/updating

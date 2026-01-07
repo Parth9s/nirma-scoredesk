@@ -12,7 +12,8 @@ import {
     FileText,
     Upload,
     Sparkles,
-    Calendar
+    Calendar,
+    Info
 } from 'lucide-react';
 import { usePreferencesStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
     { href: '/dashboard/resources/notes', label: 'Notes', icon: FileText },
     { href: '/dashboard/resources/pyq', label: 'PYQ', icon: BookOpen },
     { href: '/dashboard/contribute', label: 'Contribute', icon: Upload },
+    { href: '/dashboard/about', label: 'About Us', icon: Info },
     { href: '#', label: 'AI Exam Predictor (Coming Soon)', icon: Sparkles, disabled: true },
 ];
 

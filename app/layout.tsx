@@ -16,8 +16,8 @@ export const metadata: Metadata = {
     default: "Stride | Academic Dashboard",
     template: "%s | Stride"
   },
-  description: "The ultimate academic companion for Nirma University students. Calculate SGPA/CGPA, track attendance, and access study resources.",
-  keywords: ["Nirma University", "Stride", "NSD", "ScoreDesk", "SGPA Calculator", "CGPA Calculator", "Nirma Attendance", "Engineering Notes", "PYQ"],
+  description: "The ultimate academic companion for engineering students. Calculate SGPA/CGPA, track attendance, and access study resources.",
+  keywords: ["Stride", "ScoreDesk", "SGPA Calculator", "CGPA Calculator", "Attendance Tracker", "Engineering Notes", "PYQ"],
   authors: [{ name: "Parth Savaliya" }],
   creator: "Parth Savaliya",
   openGraph: {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: "https://strideee.in",
     title: "Stride - Student Dashboard",
-    description: "Track your academic progress, calculate grades, and access resources at Nirma University.",
+    description: "Track your academic progress, calculate grades, and access resources.",
     siteName: "Stride",
     images: [{
       url: "/icon.png", // Next.js will resolve this
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Stride",
-    description: "Your academic dashboard for Nirma University.",
+    description: "Your academic dashboard.",
     images: ["/icon.png"], // Same icon
   },
   robots: {

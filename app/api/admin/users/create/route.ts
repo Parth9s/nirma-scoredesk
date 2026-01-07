@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         const { email, name } = body;
 
         if (!email || !email.endsWith('@nirmauni.ac.in')) {
-            return NextResponse.json({ error: 'Invalid email. Must be a Nirma University email.' }, { status: 400 });
+            return NextResponse.json({ error: 'Invalid email. Must be a University email.' }, { status: 400 });
         }
 
         const existingUser = await prisma.user.findUnique({
