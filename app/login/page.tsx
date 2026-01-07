@@ -9,8 +9,8 @@ export default function LoginPage() {
         <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
             <Card className="w-full max-w-sm bg-white shadow-xl">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-2xl font-bold text-blue-800">
-                        Nirma ScoreDesk
+                    <CardTitle className="text-4xl text-blue-800 great-vibes-regular">
+                        Stride
                     </CardTitle>
                     <p className="text-sm text-gray-500">Student & Faculty Portal</p>
                 </CardHeader>
@@ -33,7 +33,7 @@ export default function LoginPage() {
                         Sign in
                     </Button>
 
-        
+
                 </CardContent>
             </Card>
         </div>

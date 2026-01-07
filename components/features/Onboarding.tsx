@@ -71,7 +71,7 @@ export function Onboarding() {
             <Card className="w-full max-w-md bg-white shadow-xl">
                 <CardHeader>
                     <CardTitle className="text-2xl text-center font-bold text-gray-800">
-                        Welcome to Nirma ScoreDesk
+                        Welcome to Stride
                     </CardTitle>
                     <p className="text-center text-gray-500">Select your academic details to get started</p>
                 </CardHeader>

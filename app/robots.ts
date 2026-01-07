@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/dashboard/', '/admin/dashboard/'], // Protect private routes from crawling
         },
-        sitemap: 'https://nirma-scordesk.vercel.app/sitemap.xml',
+        sitemap: 'https://strideee.in/sitemap.xml',
     }
 }

@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Nirma ScoreDesk',
-        short_name: 'ScoreDesk',
+        name: 'Stride',
+        short_name: 'Stride',
         description: 'Academic companion for Nirma University students',
         start_url: '/',
         display: 'standalone',

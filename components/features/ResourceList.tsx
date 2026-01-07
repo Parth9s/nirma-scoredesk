@@ -116,8 +116,23 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
         }
 
         // 2. Must match search filter (if any)
-        if (filterSubject && !r.subject.name.toLowerCase().includes(filterSubject.toLowerCase()) && !r.title.toLowerCase().includes(filterSubject.toLowerCase())) {
-            return false;
+        // 2. Must match search filter (if any)
+        if (filterSubject) {
+            const searchLower = filterSubject.toLowerCase();
+            const subjectName = r.subject.name.toLowerCase();
+            const title = r.title.toLowerCase();
+
+            // Generate initials (e.g. "Data Structures" -> "ds")
+            // Filter out common stopwords if needed, but simple split/map usually works for "DS", "CN"
+            const initials = r.subject.name
+                .split(/\s+/)
+                .map(word => word[0])
+                .join('')
+                .toLowerCase();
+
+            if (!subjectName.includes(searchLower) && !title.includes(searchLower) && !initials.includes(searchLower)) {
+                return false;
+            }
         }
 
         return true;

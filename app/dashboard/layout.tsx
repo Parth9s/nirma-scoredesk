@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function DashboardLayout({
@@ -16,7 +16,7 @@ export default function DashboardLayout({
         <div className="min-h-screen dashboard-theme flex flex-col md:flex-row">
             {/* Mobile Header */}
             <div className="md:hidden flex items-center justify-between p-4 bg-gradient-to-br from-slate-200 to-white border-b sticky top-0 z-30">
-                <div className="font-bold text-primary">Nirma ScoreDesk</div>
+                <span className="text-primary great-vibes-regular text-2xl">Stride</span>
                 <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)}>
                     <Menu className="h-6 w-6" />
                 </Button>

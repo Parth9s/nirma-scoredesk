@@ -47,6 +47,13 @@ export const config = {
                 // Allow Nirma Domain for students
                 if (profile?.email?.endsWith("@nirmauni.ac.in")) {
                     try {
+                        // Check if user exists and is banned BEFORE upserting/updating
+                        const existingUser = await prisma.user.findUnique({ where: { email: profile.email as string } });
+                        if (existingUser && existingUser.isBanned) {
+                            console.log(`Banned user attempted login: ${profile.email}`);
+                            return false; // Deny login
+                        }
+
                         // Ensure user exists in DB
                         // We use upsert to create if not exists, or update name/image if changed
                         await prisma.user.upsert({
@@ -112,8 +119,12 @@ export const config = {
                             where: { email: profile.email as string }
                         });
                         token.hasGlobalAccess = dbUser?.hasGlobalAccess || false;
+                        // @ts-ignore
+                        token.isBanned = dbUser?.isBanned || false;
                     } catch (e) {
                         token.hasGlobalAccess = false;
+                        // @ts-ignore
+                        token.isBanned = false;
                     }
                 }
             }
@@ -132,6 +143,8 @@ export const config = {
                         if (dbUser) {
                             token.hasGlobalAccess = dbUser.hasGlobalAccess;
                             token.role = dbUser.role; // Sync role too
+                            // @ts-ignore
+                            token.isBanned = dbUser.isBanned;
                         }
                     } catch (e) {
                         // DB down, keep existing token values
@@ -166,6 +179,8 @@ export const config = {
 
             // 2. Dashboard Routes: REQUIRE LOGIN (Any Role)
             if (pathname.startsWith("/dashboard")) {
+                // @ts-ignore
+                if (auth?.token?.isBanned || auth?.user?.isBanned) return false; // Force logout if banned
                 return isLoggedIn;
             }
 

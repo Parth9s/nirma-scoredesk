@@ -40,7 +40,7 @@ export function Sidebar({ className, onLinkClick }: { className?: string, onLink
     return (
         <aside className={cn("h-screen w-64 border-r bg-sidebar flex flex-col", className)}>
             <div className="flex h-16 items-center px-6 border-b shrink-0 bg-sidebar">
-                <h1 className="text-xl font-bold text-sidebar-primary">Nirma ScoreDesk</h1>
+                <h1 className="text-3xl tracking-tight text-sidebar-primary great-vibes-regular">Stride</h1>
             </div>
 
             <div className="p-4 border-b bg-white shrink-0">

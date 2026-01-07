@@ -93,8 +93,11 @@ export default function AdminInsightsPage() {
                                             <Shield className="h-4 w-4 text-blue-600" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium">{log.user?.email}</p>
-                                            <p className="text-xs text-gray-500">Logged in via {JSON.parse(log.metadata || '{}').provider}</p>
+                                            <p className="text-sm font-medium">{log.user?.name || log.user?.email}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {log.user?.name ? log.user?.email + ' • ' : ''}
+                                                Logged in via {JSON.parse(log.metadata || '{}').provider}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="text-xs text-gray-400">
