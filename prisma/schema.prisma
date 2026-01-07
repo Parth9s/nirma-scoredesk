@@ -55,7 +55,7 @@ model Subject {
 
   evaluationConfigs EvaluationConfig[]
   resources        Resource[]
-  assignments      PeerAssignment[]
+
   importantTopics  ImportantTopic[]
   schedules        SubjectSchedule[]
   
@@ -155,37 +155,4 @@ model ActivityLog {
   createdAt DateTime @default(now())
 }
 
-model PeerAssignment {
-  id          String   @id @default(uuid())
-  title       String   // Topic of assignment
-  subjectId   String
-  subject     Subject  @relation(fields: [subjectId], references: [id])
-  
-  facultyName String   // Name of faculty given assignment
-  studentName String   // Alias/Name of uploader
-  division    String?  // Optional division
-  
-  url         String   // File URL
-  
-  // Track individual downloads
-  downloads        PeerAssignmentDownload[]
-  // Keep simple counter for efficient sorting/display if needed, or compute it
-  downloadCount    Int      @default(0) 
-  
-  createdAt   DateTime @default(now())
 
-  @@index([subjectId])
-}
-
-model PeerAssignmentDownload {
-  id              String         @id @default(uuid())
-  assignmentId    String
-  assignment      PeerAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  
-  downloaderName  String
-  downloaderFaculty String
-  
-  downloadedAt    DateTime       @default(now())
-  
-  @@index([assignmentId])
-}

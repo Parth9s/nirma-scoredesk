@@ -141,16 +141,7 @@ export function Dashboard() {
                             iconColorClass="text-purple-600"
                             buttonText="View Notes"
                         />
-                        <FeatureLinkCard
-                            title="Peer Assignments"
-                            description="Share and copy assignments from batchmates."
-                            icon={BookOpen}
-                            href="/dashboard/assignments"
-                            borderColorClass="border-l-orange-500"
-                            iconBgClass="bg-orange-100"
-                            iconColorClass="text-orange-600"
-                            buttonText="Browse"
-                        />
+
                     </div>
                 </section>
 

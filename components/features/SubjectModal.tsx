@@ -40,17 +40,11 @@ export function SubjectModal({ subject, isOpen, onClose }: SubjectModalProps) {
                     </div>
                 </DialogHeader>
 
-                <div className="grid grid-cols-2 gap-4 my-4">
+                <div className="grid grid-cols-1 gap-4 my-4">
                     <div className="bg-slate-50 p-3 rounded-lg border flex flex-col items-center justify-center text-center">
                         <GraduationCap className="h-5 w-5 text-slate-500 mb-1" />
                         <span className="text-2xl font-bold text-slate-800">{subject.credits}</span>
                         <span className="text-xs text-slate-500 uppercase tracking-wider font-medium">Credits</span>
-                    </div>
-                    {/* Placeholder for future stats like Attendance or Grade */}
-                    <div className="bg-slate-50 p-3 rounded-lg border flex flex-col items-center justify-center text-center opacity-50 cursor-not-allowed" title="Coming Soon">
-                        <BarChart3 className="h-5 w-5 text-slate-500 mb-1" />
-                        <span className="text-2xl font-bold text-slate-800">--</span>
-                        <span className="text-xs text-slate-500 uppercase tracking-wider font-medium">Your Score</span>
                     </div>
                 </div>
 
