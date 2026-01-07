@@ -43,6 +43,7 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
 
     // Initialize filter from URL param 'subject' if present
     const [filterSubject, setFilterSubject] = useState(searchParams?.get('subject') || '');
+    const subjectId = searchParams?.get('subjectId');
 
     useEffect(() => {
         const fetchResources = async () => {
@@ -61,6 +62,7 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
                 if (branch) url += `&branch=${encodeURIComponent(branch)}`;
                 if (semester) url += `&semester=${semester}`;
                 if (subjectGroup) url += `&subjectGroup=${subjectGroup}`;  // Optimization
+                if (subjectId) url += `&subjectId=${subjectId}`;
 
                 const res = await fetch(url);
                 if (res.ok) {
@@ -80,8 +82,10 @@ export function ResourceList({ type }: { type: 'NOTE' | 'PYQ' }) {
         fetchResources();
     }, [type, branch, semester, subjectGroup, cacheKey, getCache, setCache]);
 
-    // Filter by User Preferences (Branch/Sem) AND Local Search Input
     const filteredResources = resources.filter(r => {
+        // 0. If filtering by specific Subject ID (Shared Mode), skip branch/sem checks
+        if (subjectId) return true;
+
         // 1. Must match user's branch and semester
         if (branch && r.subject.semester.branch.name !== branch) return false;
         if (semester && r.subject.semester.number !== semester) return false;

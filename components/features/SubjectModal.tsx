@@ -52,7 +52,7 @@ export function SubjectModal({ subject, isOpen, onClose }: SubjectModalProps) {
                     <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Quick Actions</h4>
 
                     <Button className="w-full justify-start text-left h-auto py-3 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:text-purple-900 border border-purple-200 shadow-sm" asChild>
-                        <Link href={`/dashboard/resources/notes?subject=${encodeURIComponent(subject.name)}`}>
+                        <Link href={`/dashboard/resources/notes?subject=${encodeURIComponent(subject.name)}&subjectId=${subject.id}`}>
                             <div className="bg-white p-2 rounded-full mr-3 shadow-sm">
                                 <BookOpen className="h-5 w-5 text-purple-600" />
                             </div>
@@ -64,7 +64,7 @@ export function SubjectModal({ subject, isOpen, onClose }: SubjectModalProps) {
                     </Button>
 
                     <Button className="w-full justify-start text-left h-auto py-3 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-900 border border-blue-200 shadow-sm" asChild>
-                        <Link href={`/dashboard/resources/pyq?subject=${encodeURIComponent(subject.name)}`}>
+                        <Link href={`/dashboard/resources/pyq?subject=${encodeURIComponent(subject.name)}&subjectId=${subject.id}`}>
                             <div className="bg-white p-2 rounded-full mr-3 shadow-sm">
                                 <FileText className="h-5 w-5 text-blue-600" />
                             </div>

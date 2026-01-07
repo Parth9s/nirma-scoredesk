@@ -15,7 +15,25 @@ export async function GET(request: Request) {
         type: type ? (type as any) : undefined
     };
 
-    if (branchName || semesterNumber) {
+    if (subjectId) {
+        // SHARED RESOURCE LOGIC:
+        // If a subjectId is provided (e.g., from clicking a subject card), we want to show
+        // resources for that subject CODE across ALL branches/semesters.
+        const subject = await prisma.subject.findUnique({
+            where: { id: subjectId },
+            select: { code: true }
+        });
+
+        if (subject?.code) {
+            // Overwrite the specific subjectId check with a generic code check
+            delete whereClause.subjectId;
+            whereClause.subject = {
+                code: subject.code
+            };
+            // We do NOT apply branch/semester filters here, as we want to see shared resources
+        }
+    } else if (branchName || semesterNumber) {
+        // ... Normal filtering logic (only if NOT in shared subject mode)
         whereClause.subject = { semester: {} };
 
         if (semesterNumber) {
