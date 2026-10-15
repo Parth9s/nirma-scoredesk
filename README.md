@@ -41,6 +41,7 @@
 - **Auth**: [NextAuth.js](https://next-auth.js.org/) (v5)
 - **Deployment**: [Vercel](https://vercel.com/)
 
+
 ## ⚡ Performance
 
 - **LCP**: ~0.19s (Optimized for speed)
